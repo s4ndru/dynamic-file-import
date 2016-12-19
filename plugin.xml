@@ -1,0 +1,59 @@
+<plugin name='dynamic-file-import' version='0.5' grailsVersion='2.2 &gt; *'>
+  <author>David Sandru</author>
+  <authorEmail>sandru@student.tugraz.at</authorEmail>
+  <title>Dynamic File Import Plugin</title>
+  <description>Brief summary/description of the plugin.
+</description>
+  <documentation>http://grails.org/plugin/dynamic-file-import</documentation>
+  <type>DynamicFileImportGrailsPlugin</type>
+  <resources>
+    <resource>parsing.ParsingController</resource>
+    <resource>extraction.ColumnWidthEntry</resource>
+    <resource>extraction.ColumnWidthParser</resource>
+    <resource>extraction.DynamicParser</resource>
+    <resource>extraction.DynamicParserEntry</resource>
+    <resource>extraction.TagSelectEntry</resource>
+    <resource>extraction.TagSelectParser</resource>
+    <resource>extraction.TokenSplitEntry</resource>
+    <resource>extraction.TokenSplitParser</resource>
+    <resource>testing.ColumnWidthTest</resource>
+    <resource>testing.TagSelectTest</resource>
+    <resource>testing.TestAddress</resource>
+    <resource>testing.TestContact</resource>
+    <resource>testing.TestFacility</resource>
+    <resource>testing.TestResponsibility</resource>
+    <resource>testing.TokenSplitTest</resource>
+    <resource>transformation.ParamEntry</resource>
+    <resource>transformation.ParamEntryWrapper</resource>
+    <resource>transformation.TransformationProcedure</resource>
+    <resource>transformation.TransformationRoutine</resource>
+    <resource>extraction.FileParsingService</resource>
+    <resource>transformation.TransformationService</resource>
+    <resource>extraction.CreateColumnWidthParserTagLib</resource>
+    <resource>extraction.CreateTokenSplitParserTagLib</resource>
+    <resource>extraction.FilesSelectionTagLib</resource>
+  </resources>
+  <repositories>
+    <repository name='grailsCentral' url='http://grails.org/plugins' />
+    <repository name='mavenCentral' url='http://repo1.maven.org/maven2/' />
+    <repository name='https://oosnmp.net/dist/release/' url='https://oosnmp.net/dist/release/' />
+    <repository name='https://repo.grails.org/grails/plugins' url='https://repo.grails.org/grails/plugins/' />
+    <repository name='http://repository.springsource.com/maven/bundles/external' url='http://repository.springsource.com/maven/bundles/external/' />
+  </repositories>
+  <dependencies>
+    <runtime>
+      <dependency group='org.grails.plugins' name='jquery' version='1.11.1' />
+      <dependency group='mysql' name='mysql-connector-java' version='5.1.21' />
+    </runtime>
+  </dependencies>
+  <plugins>
+    <runtime>
+      <plugin group='org.grails.plugins' name='hibernate' version='2.2.4' />
+    </runtime>
+    <build>
+      <plugin group='org.grails.plugins' name='tomcat' version='2.2.4' />
+    </build>
+  </plugins>
+  <runtimePluginRequirements />
+  <behavior />
+</plugin>
