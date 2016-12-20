@@ -1,7 +1,7 @@
-<g:form controller="parsing" action="createColumnWidthParser">
+<g:form controller="extraction" action="createColumnWidthParser">
     <div id="parser">
         <div>
-            <g:render template="parser"/>
+            <g:render template="/extraction/parser"/>
         </div>
         <div id="linesToIgnore">
             <g:textField name="lineToIgnore0" placeholder="substring to ignore" />
@@ -10,13 +10,14 @@
     </div>
 
     <div id="entryContainer">
-        <g:render template="entries"/>
+        <g:render template="/extraction/entries"/>
     </div>
 
-    <g:actionSubmit name="submitColumnWidthParser" id="submitColumnWidthParser" value="submit parser" action="createColumnWidthParser" onclick="return verifyForm()"/>
+    <g:actionSubmit name="submitColumnWidthParser" id="submitColumnWidthParser" value="save parser" action="createColumnWidthParser" onclick="return verifyForm()" style="float: right;"/>
 </g:form>
 
 %{-- TODO some more checks columnStart and columnEnd--}%
+%{-- TODO mention in document that different "creation" pages should not be mixed because of similar JS names and stuff --}%
 <g:javascript>
     appendColumnWidthEntry(0);
     $("#entry0").append('<label>(Eg. 1-5, 5-12, 12-25)</label>')

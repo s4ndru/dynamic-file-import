@@ -1,7 +1,7 @@
 <div id="entries">
     <div id="entry0">
         <g:textField name="field0" placeholder="Property"/>
-        <g:select name="dataType0" from="${parsing.EntryDatatype.values()}" />
+        <g:select name="dataType0" from="${extraction.EntryDatatype.values()}" />
         <label for="optional0">Optional</label><g:checkBox name="optional0" />
         <label for="trim0">Trim</label><g:checkBox name="trim0" />
     </div>

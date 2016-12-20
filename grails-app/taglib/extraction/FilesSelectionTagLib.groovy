@@ -5,7 +5,7 @@ class FilesSelectionTagLib {
     static namespace="dfi"
 
     def fileSelection = {
-        out << g.form(action: "parseFiles", controller: "parsing", name: "dfiParsingForm", {
+        out << g.form(action: "parseFiles", controller: "extraction", name: "dfiParsingForm", {
             "<input type='Text' id='filesPath' name='filesPath'/>" +
             g.actionSubmit(action: "parseFiles", value: "parse files")})
 

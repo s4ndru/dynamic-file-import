@@ -7,7 +7,7 @@
   <documentation>http://grails.org/plugin/dynamic-file-import</documentation>
   <type>DynamicFileImportGrailsPlugin</type>
   <resources>
-    <resource>parsing.ParsingController</resource>
+    <resource>extraction.ExtractionController</resource>
     <resource>extraction.ColumnWidthEntry</resource>
     <resource>extraction.ColumnWidthParser</resource>
     <resource>extraction.DynamicParser</resource>

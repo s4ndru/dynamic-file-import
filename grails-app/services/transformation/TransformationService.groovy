@@ -88,7 +88,7 @@ class TransformationService {
         return
     }
 
-    static def getClassFromString(String className){
+    static def getClassFromString(String className) throws IncorrectSpecificationException{
         def grailsApplication = Holders.getGrailsApplication()
         Class object = grailsApplication.getDomainClass(className)?.clazz
 

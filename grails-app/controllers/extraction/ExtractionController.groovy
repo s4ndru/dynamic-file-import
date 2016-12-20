@@ -1,18 +1,25 @@
-package parsing
+package extraction
 
 import org.springframework.orm.hibernate3.HibernateTemplate
 import testing.*
-import extraction.*
 import transformation.*
 
-class ParsingController {
+class ExtractionController {
 
     def index(){
         render(view: "/testing/test", params: params)
     }
 
+    def createCWP(){
+        render(view: "/testing/CWP_test", params: params)
+    }
+
+    def createTSP(){
+        render(view: "/testing/TSP_test", params: params)
+    }
+
     def parseFiles(){
-        bootstrap()
+        //bootstrap()
 
         File dir = new File((String)params.filesPath)
         ArrayList<ArrayList<Map<String, String>>> results = FileParsingService.parseAllFilesInDirectory(dir)
@@ -404,7 +411,7 @@ class ParsingController {
 
     def createTokenSplitParser(){
         if(TokenSplitParser.findBySelectorNameAndSelectorFileType((String)params.selectorName, AllowedFiletype.fromString((String)params.selectorFileType))) {
-            response.sendError(400, "Sorry, a file with the same 'filename substring' and 'file type' already exists! Please go back and reconsider those parameters.")
+            response.sendError(400, "Sorry, a parser with the same 'filename substring' and 'file type' already exists! Please go back and reconsider those parameters.")
             //redirect(url: request.getHeader('referer'), params: params)
             return
         }
@@ -449,7 +456,7 @@ class ParsingController {
 
     def createColumnWidthParser(){
         if(ColumnWidthParser.findBySelectorNameAndSelectorFileType((String)params.selectorName, AllowedFiletype.fromString((String)params.selectorFileType))) {
-            response.sendError(400, "Sorry, a parsing with the same 'filename substring' and 'file type' is already created! Please go back and reconsider those parameters.")
+            response.sendError(400, "Sorry, a parser with the same 'filename substring' and 'file type' is already created! Please go back and reconsider those parameters.")
             //redirect(url: request.getHeader('referer'), params: params)
             return
         }
@@ -486,6 +493,6 @@ class ParsingController {
         cwp.entries = cwe_array
         cwp.save(flush: true)
 
-        return;
+        return
     }
 }

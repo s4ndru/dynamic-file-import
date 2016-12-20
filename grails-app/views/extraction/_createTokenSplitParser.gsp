@@ -1,4 +1,4 @@
-<g:form controller="parsing" action="createTokenSplitParser" params="[targetUri: (request.forwardURI - request.contextPath)]">
+<g:form controller="extraction" action="createTokenSplitParser" params="[targetUri: (request.forwardURI - request.contextPath)]">
     <div id="parser">
         <div>
             <g:render template="/extraction/parser"/>
@@ -15,7 +15,11 @@
         <g:render template="/extraction/entries"/>
     </div>
 
-    <g:actionSubmit name="submitTokenSplitParser" id="submitTokenSplitParser" value="submit parsing" action="createTokenSplitParser" onclick="return verifyForm()"/>
+    <div id="routineContainer">
+        <g:render template="/transformation/selectRoutines"/>
+    </div>
+
+    <g:actionSubmit name="submitTokenSplitParser" id="submitTokenSplitParser" value="save parser" action="createTokenSplitParser" onclick="return verifyForm()"/>
 </g:form>
 
 <g:javascript>

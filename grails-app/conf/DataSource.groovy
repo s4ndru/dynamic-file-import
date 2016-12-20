@@ -1,9 +1,3 @@
-//dataSource {
-//    pooled = true
-//    driverClassName = "org.h2.Driver"
-//    username = "sa"
-//    password = ""
-//}
 hibernate {
     cache.use_second_level_cache = true
     cache.use_query_cache = false
@@ -17,7 +11,7 @@ environments {
             pooled = true
             driverClassName = "com.mysql.jdbc.Driver"
             username = "root"
-            password = "49eftech50.-"
+            password = "L1nk1n2"
             url = "jdbc:mysql://localhost:3306/bakk_schema"
         }
     }
