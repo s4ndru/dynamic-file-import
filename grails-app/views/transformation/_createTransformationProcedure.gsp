@@ -1,12 +1,17 @@
+<%@ page import="transformation.TransformationRoutine; transformation.MethodInfo" %>
+
 <g:form>
     <div>
-        <g:textField name="transformation_method" required="required" placeholder="Methodname"/>
+        <label for="routine">Routine: </label>
+        <g:select from="${TransformationRoutine.getAll()}" noSelection="[null: 'please select a routine...']" id="routine" name="routine" required="required"/>
     </div>
-
     <div>
-        <g:field name="order_id" type="number" min="0" required="required" placeholder="Order number"/>
+        <label for="transformation_method">Methodname: </label>
+        <g:select from="${MethodInfo.values()}" noSelection="[null : 'please select a method...']" id="transformation_method" name="transformation_method" required="required"/>
     </div>
-
+    <div>
+        <g:field name="order_id" type="number" min="0" required="required" placeholder="Sequence number"/>
+    </div>
     <div>
         <label for="is_repetitive">Repetitive procedure</label>
         <g:checkBox name="is_repetitive" value="true"/>
@@ -27,7 +32,7 @@
         </label>
     </div>
 
-    <div>
+    <div id="parameter_container_container">
         <label id="parameter_container_label" for="parameter_container">
             Method parameters:
             <div id="parameter_container">
@@ -40,8 +45,8 @@
                 <button type="button" id="addParamBtn0" >add parameterpair</button>
                 <hr>
             </div>
-            <button type="button" id="addWrapperBtn" >add wrapper</button>
         </label>
+        <button type="button" id="addWrapperBtn" >add wrapper</button>
     </div>
 
 </g:form>
@@ -63,7 +68,7 @@
     var param_index = 0;
 
     //TODO finish
-    $('#parameter_container_label').on('click', '#addWrapperBtn', function(){
+    $('#parameter_container_container').on('click', '#addWrapperBtn', function(){
         wrapper_index++
 
         var div = document.createElement('div');

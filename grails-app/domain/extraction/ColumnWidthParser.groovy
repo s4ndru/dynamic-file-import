@@ -22,7 +22,7 @@ class ColumnWidthParser extends DynamicParser{
                 if(line.contains(forbiddenLine)){
                     // We found a line which the user told us to ignore => skip following procedure.
                     skip = true
-                    break;
+                    break
                 }
             }
 

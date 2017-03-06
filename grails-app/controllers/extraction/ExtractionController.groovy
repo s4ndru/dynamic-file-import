@@ -1,7 +1,5 @@
 package extraction
 
-import org.springframework.orm.hibernate3.HibernateTemplate
-import testing.*
 import transformation.*
 
 class ExtractionController {
@@ -14,8 +12,12 @@ class ExtractionController {
         render(view: "/testing/CWP_test", params: params)
     }
 
-    def createTSP(){
-        render(view: "/testing/TSP_test", params: params)
+    def createTokenSplit(){
+        render(view: "/testing/Tokensplit_test", params: params)
+    }
+
+    def createTagSelect(){
+        render(view: "/testing/Tokensplit_test", params: params)
     }
 
     def parseFiles(){
@@ -433,8 +435,8 @@ class ExtractionController {
         ArrayList<TokenSplitEntry> tse_array = new ArrayList<TokenSplitEntry>()
         i = 0
         while(params["field" + i]) {
-            ArrayList<Integer> indizes = new ArrayList<Integer>();
-            params["splitIndizes"+i].split(",").each {indizes.add(Integer.parseInt(it))} ;
+            ArrayList<Integer> indizes = new ArrayList<Integer>()
+            params["splitIndizes"+i].split(",").each {indizes.add(Integer.parseInt((String)it))}
 
             tse_array.add(new TokenSplitEntry(
                     field: params["field" + i],
@@ -451,7 +453,7 @@ class ExtractionController {
         tsp.entries = tse_array
         tsp.save(flush: true)
 
-        return;
+        redirect(action: "createTokenSplit")
     }
 
     def createColumnWidthParser(){
@@ -492,7 +494,5 @@ class ExtractionController {
         cwe_array.each({it.save(flush: true)})
         cwp.entries = cwe_array
         cwp.save(flush: true)
-
-        return
     }
 }

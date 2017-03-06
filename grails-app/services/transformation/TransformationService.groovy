@@ -230,6 +230,7 @@ class TransformationService {
         return [datum, null]
     }
 
+
     static def regexReplace(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
         // TODO
         return [datum, null]

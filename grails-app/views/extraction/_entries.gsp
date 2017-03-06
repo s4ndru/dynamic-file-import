@@ -6,7 +6,7 @@
         <label for="trim0">Trim</label><g:checkBox name="trim0" />
     </div>
 </div>
-<button type="button" id="addEntryBtn" >add entry</button>
+<button type="button" id="addEntryBtn" >add another entry</button>
 
 <g:javascript>
     var entryCounter = 0;

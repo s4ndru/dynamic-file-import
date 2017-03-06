@@ -3,12 +3,12 @@ package extraction
 /**
  * Created by s4ndru on 04/04/2016.
  */
-public enum AllowedFiletype {
+enum AllowedFiletype {
     TXT(".txt"), CSV(".csv")//, XML(".xml")
 
     String propertyName
 
-    public AllowedFiletype(String propertyName) {
+    AllowedFiletype(String propertyName) {
         this.propertyName = propertyName
     }
 
@@ -16,15 +16,15 @@ public enum AllowedFiletype {
         return propertyName
     }
 
-    public static AllowedFiletype fromString(String text) {
+    static AllowedFiletype fromString(String text) {
         if (text != null) {
-            for (AllowedFiletype type : AllowedFiletype.values()) {
+            for (AllowedFiletype type : values()) {
                 if (text.equalsIgnoreCase(type.propertyName)) {
-                    return type;
+                    return type
                 }
             }
         }
-        return null;
+        return null
     }
 }
 

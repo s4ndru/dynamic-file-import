@@ -3,12 +3,12 @@ package extraction;
 /**
  * Created by s4ndru on 04/04/2016.
  */
-public enum EntryDatatype {
+enum EntryDatatype {
     STRING("String"), INTEGER("Integer"), FLOAT("Float") //, DATE("date")
 
     String propertyName
 
-    public EntryDatatype(String propertyName) {
+    EntryDatatype(String propertyName) {
         this.propertyName = propertyName
     }
 
@@ -16,15 +16,15 @@ public enum EntryDatatype {
         return propertyName
     }
 
-    public static EntryDatatype fromString(String text) {
+    static EntryDatatype fromString(String text) {
         if (text != null) {
-            for (EntryDatatype type : EntryDatatype.values()) {
+            for (EntryDatatype type : values()) {
                 if (text.equalsIgnoreCase(type.propertyName)) {
-                    return type;
+                    return type
                 }
             }
         }
-        return null;
+        return null
     }
 
 //    public static Date parseDate(){

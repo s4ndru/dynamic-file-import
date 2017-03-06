@@ -1,5 +1,7 @@
 package transformation
 
+import extraction.DynamicParser
+
 class TransformationRoutine implements Comparable{
 
     Integer order_id = 0
@@ -19,7 +21,6 @@ class TransformationRoutine implements Comparable{
 //                    (obj.to_update && val != null && obj.update_identification_parsingfield != null)
 //        }
 
-
         to_update validator: { val, obj ->
             return (!val && obj.update_properties.isEmpty()) || (val && !obj.update_properties.isEmpty())
         }
@@ -31,5 +32,10 @@ class TransformationRoutine implements Comparable{
 
     int compareTo(obj) {
         order_id.compareTo((obj as TransformationRoutine).order_id)
+    }
+
+    String toString(){
+        def parser = DynamicParser.find("from DynamicParser where ? in elements(routines)", [this])
+        return "Routine #" + this.order_id + " for '" + this.target_object + "' in parser '" + parser.name + "'"
     }
 }

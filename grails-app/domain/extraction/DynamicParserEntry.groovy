@@ -1,4 +1,5 @@
 package extraction
+
 // The FileEntryParser represents an Entry in a File, for the FileParser
 abstract class DynamicParserEntry{
 
@@ -46,5 +47,7 @@ abstract class DynamicParserEntry{
         else if(dataType == EntryDatatype.STRING){
             return true
         }
+
+        return false
     }
 }

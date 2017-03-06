@@ -1,38 +1,18 @@
+<%@ page import="extraction.DynamicParser" %>
 <g:form controller="transformation" action="createTransformationRoutine">
     <div>
         <label for="belongs_to">Parser:</label>
-        <g:select name="belongs_to" from="${extraction.DynamicParser.getAll()}" noSelection="[null : 'please select a parser...']" optionKey="id" required="required"/>
+        <g:select name="belongs_to" from="${DynamicParser.getAll()}" noSelection="[null: 'Please select a parser...']" optionKey="id" required="required" />
+                  %{-- onchange="${remoteFunction(action: 'setRoutineProperties', update: "routineContainer", params: '\'parser=\' + this.value')};" />--}%
     </div>
-
     <div>
-        <g:textField name="target_object" placeholder="Name of targetobject" required="required"/>
+        <label for="target_object">Object:</label>
+        <g:select name="target_object" from="${params.domainList}" noSelection="[null : 'Please select a targetobject...']" required="required"/>
     </div>
+    <g:remoteLink action="setRoutineProperties" update="routineContainer" params="{parser: \$('#belongs_to').val(), targetObject: \$('#target_object').val()}">Submit selected</g:remoteLink>
 
-    <div>
-        <label for="to_update">Update existing:</label>
-        <g:checkBox name="to_update" value="true"/>
+    <div id="routineContainer">
     </div>
-
-    <div>
-        <g:field name="order_id" type="number" required="required" onchange="" min="0" placeholder="Order number"/>
-    </div>
-
-    <div>
-        <label for="property_container">
-            Properties of object to update:
-            <div id="property_container">
-                <div id="update_properties">
-                    <div id="update_property0">
-                        <g:textField name="update_key0" id="update_key0" placeholder="propertykey" />
-                        <g:textField name="update_value0" id="update_value0" placeholder="propertyvalue" />
-                    </div>
-                </div>
-                <button type="button" id="addPropertyBtn" >add propertypair</button>
-            </div>
-        </label>
-    </div>
-
-    <g:actionSubmit name="submitTransformationRoutine" id="submitTransformationRoutine" value="save TransformationRoutine" action="createTransformationRoutine" onclick="return verifyForm()" style="float: right;"/>
 </g:form>
 
 <g:javascript>
@@ -56,16 +36,6 @@
         return true;
     }
 
-    $('#property_container').on('click', '#addPropertyBtn', function(){
-        updatePropertyCounter++
-
-        var div = document.createElement('div');
-        div.id = 'update_property' + updatePropertyCounter;
-        div.innerHTML = '<input name="update_key' + updatePropertyCounter + '" placeholder="propertykey" id="update_key' + updatePropertyCounter + '" type="text" required="required"> ' +
-        '<input name="update_value' + updatePropertyCounter + '" placeholder="propertyvalue" id="update_value' + updatePropertyCounter + '" type="text" required="required">';
-
-        $('#update_properties').append(div);
-    });
 </g:javascript>
 
 

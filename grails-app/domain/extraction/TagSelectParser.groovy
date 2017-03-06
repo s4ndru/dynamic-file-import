@@ -16,7 +16,7 @@ class TagSelectParser extends DynamicParser{
     ArrayList<Map<String, String>> parse(File file) throws ParserUnfitException {
         if(is_xml)
         {
-            new XmlSlurper().parse(file);
+            new XmlSlurper().parse(file)
         }
 
         return null

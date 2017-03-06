@@ -8,16 +8,16 @@
 
             <g:textField name="lineToIgnore0" placeholder="substring to ignore" />
         </div>
-        <button type="button" id="addLineToIgnore" >add substring to ignore</button>
+        <button type="button" id="addLineToIgnore" >add another substring to ignore</button>
     </div>
 
     <div id="entryContainer">
         <g:render template="/extraction/entries"/>
     </div>
 
-    <div id="routineContainer">
-        <g:render template="/transformation/selectRoutines"/>
-    </div>
+    %{--<div id="routineContainer">--}%
+        %{--<g:render template="/transformation/selectRoutines"/>--}%
+    %{--</div>--}%
 
     <g:actionSubmit name="submitTokenSplitParser" id="submitTokenSplitParser" value="save parser" action="createTokenSplitParser" onclick="return verifyForm()"/>
 </g:form>
@@ -34,7 +34,7 @@
 
     function appendSplitTokenEntry(index){
         $("#entry" + index).append('<label for="multiple' + index + '">Multiple</label><g:checkBox name="multiple' + index + '" /> ');
-        $("#entry" + index).append('<input name="splitIndizes' + index + '" placeholder="Comma separated indizes" value="" id="splitIndizes' + index + '" type="text"> ');
+        $("#entry" + index).append('<input name="splitIndizes' + index + '" placeholder="Indizes (comma seperated)" value="" id="splitIndizes' + index + '" type="text"> ');
     }
 
     var lineToIgnoreCounter = 0;
@@ -79,7 +79,7 @@
             }
 
             if($("#splitIndizes" + i).val() == ""){
-                alert("Please fill out all 'Comma separated indizes'-fields.");
+                alert("Please fill out all 'Indizes (comma seperated)'-fields.");
                 return false;
             }
 
