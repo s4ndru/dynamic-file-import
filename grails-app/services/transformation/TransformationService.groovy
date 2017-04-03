@@ -319,7 +319,7 @@ class TransformationService {
     //          and "notable objects": ["name of field", "value"] => repeat X times
     //          2. Set: [propertyname of a class : name of field in datum, in which the value is saved]
     // cont. => basically fishing parameters from the current datum, as a fixed value, for the next procedure => repeat X times
-    // cont. #2 => this is the whole reason why we need the whole "createNewProcdure" sequence.
+    // cont. #2 => this is the whole reason why we need the whole "createNewProcedure" sequence.
     //          3. Set (optional): [left value of parameter for procedure : right value of parameter for procedure]
     // cont. => just passing on parameters to the next procedure, which might be needed
     static def createNewTemporaryProcedure(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {

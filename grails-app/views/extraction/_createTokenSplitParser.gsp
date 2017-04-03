@@ -1,14 +1,15 @@
-<g:form controller="extraction" action="createTokenSplitParser" params="[targetUri: (request.forwardURI - request.contextPath)]">
+<g:form class="well" controller="extraction" action="createTokenSplitParser" params="[targetUri: (request.forwardURI - request.contextPath)]">
     <div id="parser">
-        <div>
+        <div class="form-group">
             <g:render template="/extraction/parser"/>
-            <g:textField name="token" placeholder="Separation token" />
+            <g:textField class="form-control" name="token" placeholder="Separation token" />
         </div>
-        <div id="linesToIgnore">
-
-            <g:textField name="lineToIgnore0" placeholder="substring to ignore" />
+        <div class="form-group" id="linesToIgnore">
+            <g:textField class="form-control" name="lineToIgnore0" placeholder="substring to ignore" />
         </div>
-        <button type="button" id="addLineToIgnore" >add another substring to ignore</button>
+        <div class="form-group">
+            <button class="btn btn-warning" type="button" id="addLineToIgnore" >add another substring to ignore</button>
+        </div>
     </div>
 
     <div id="entryContainer">
@@ -24,7 +25,6 @@
 
 <g:javascript>
     appendSplitTokenEntry(0);
-    $("#entry0").append('<label>(Starts from 0, eg. "0", "8", "1,2,3" )</label>')
 
     $('#entryContainer').on('click', '#addEntryBtn', function(){
         // "entryCounter" is a global variable used in the usual "addEntry"-javascript.
@@ -33,15 +33,19 @@
     });
 
     function appendSplitTokenEntry(index){
-        $("#entry" + index).append('<label for="multiple' + index + '">Multiple</label><g:checkBox name="multiple' + index + '" /> ');
-        $("#entry" + index).append('<input name="splitIndizes' + index + '" placeholder="Indizes (comma seperated)" value="" id="splitIndizes' + index + '" type="text"> ');
+        $("#entry" + index).append('<div class="checkbox"><label for="multiple' + index + '" style="margin-right: 5px;"><g:checkBox name="multiple' + index + '" /> Multiple</label></div>');
+        $("#entry" + index).append('<input class="form-control" name="splitIndizes' + index + '" placeholder="Indizes (comma seperated)" value="" id="splitIndizes' + index + '" type="text"> ');
+
+        if(index == 0)
+            $("#entry0").append('<label>(Starts from 0, eg. "0", "8", "1,2,3" )</label>');
+        $("#entry" + index).append('<hr>');
     }
 
     var lineToIgnoreCounter = 0;
 
     $("#parser").on('click', '#addLineToIgnore', function(){
         lineToIgnoreCounter++;
-        $("#linesToIgnore").append('<input name="lineToIgnore' + lineToIgnoreCounter + '" placeholder="substring to ignore" value="" id="lineToIgnore' + lineToIgnoreCounter + '" type="text"> ');
+        $("#linesToIgnore").append('<input class="form-group" name="lineToIgnore' + lineToIgnoreCounter + '" placeholder="substring to ignore" value="" id="lineToIgnore' + lineToIgnoreCounter + '" type="text"> ');
     });
 
     function verifyForm(){

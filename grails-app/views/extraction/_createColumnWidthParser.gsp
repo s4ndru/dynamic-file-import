@@ -1,26 +1,28 @@
-<g:form controller="extraction" action="createColumnWidthParser">
+<g:form class="well" controller="extraction" action="createColumnWidthParser">
     <div id="parser">
-        <div>
+        <div class="form-group">
             <g:render template="/extraction/parser"/>
         </div>
-        <div id="linesToIgnore">
-            <g:textField name="lineToIgnore0" placeholder="substring to ignore" />
+        <div class="form-group" id="linesToIgnore">
+            <g:textField class="form-control" name="lineToIgnore0" placeholder="substring to ignore" />
         </div>
-        <button type="button" id="addLineToIgnore" >add substring to ignore</button>
+        <div class="form-group">
+            <button class="btn btn-warning" type="button" id="addLineToIgnore" >add substring to ignore</button>
+        </div>
     </div>
 
     <div id="entryContainer">
         <g:render template="/extraction/entries"/>
     </div>
 
-    <g:actionSubmit name="submitColumnWidthParser" id="submitColumnWidthParser" value="save parser" action="createColumnWidthParser" onclick="return verifyForm()" style="float: right;"/>
+    <g:actionSubmit class="btn btn-primary" name="submitColumnWidthParser" id="submitColumnWidthParser" value="save parser" action="createColumnWidthParser" onclick="return verifyForm()" style="float: right;"/>
+    <div style="clear: both;"></div>
 </g:form>
 
 %{-- TODO some more checks columnStart and columnEnd--}%
 %{-- TODO mention in document that different "creation" pages should not be mixed because of similar JS names and stuff --}%
 <g:javascript>
     appendColumnWidthEntry(0);
-    $("#entry0").append('<label>(Eg. 1-5, 5-12, 12-25)</label>')
 
     $('#entryContainer').on('click', '#addEntryBtn', function(){
         // "entryCounter" is a global variable used in the usual "addEntry"-javascript.
@@ -29,15 +31,20 @@
     });
 
     function appendColumnWidthEntry(index){
-        $("#entry" + index).append('<input name="columnStart' + index + '" placeholder="Column start" value="" id="columnStart' + index + '" type="text"> ');
-        $("#entry" + index).append('<input name="columnEnd' + index + '" placeholder="Column end" value="" id="columnEnd' + index + '" type="text"> ');
+        $("#entry" + index).append('<input class="form-control" name="columnStart' + index + '" placeholder="Column start" value="" id="columnStart' + index + '" type="text"> ');
+        $("#entry" + index).append('<input class="form-control" name="columnEnd' + index + '" placeholder="Column end" value="" id="columnEnd' + index + '" type="text"> ');
+
+        if(index == 0)
+            $("#entry" + index).append('<label>(Eg. 1-5, 5-12, 12-25)</label>');
+
+        $("#entry" + index).append('<hr>');
     }
 
     var lineToIgnoreCounter = 0;
 
     $("#parser").on('click', '#addLineToIgnore', function(){
         lineToIgnoreCounter++;
-        $("#linesToIgnore").append('<input name="lineToIgnore' + lineToIgnoreCounter + '" placeholder="substring to ignore" value="" id="lineToIgnore' + lineToIgnoreCounter + '" type="text"> ');
+        $("#linesToIgnore").append('<input class="form-control" name="lineToIgnore' + lineToIgnoreCounter + '" placeholder="substring to ignore" value="" id="lineToIgnore' + lineToIgnoreCounter + '" type="text"> ');
     });
 
     function verifyForm(){

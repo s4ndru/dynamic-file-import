@@ -1,16 +1,17 @@
 <%@ page import="extraction.DynamicParser" %>
-<g:form controller="transformation" action="createTransformationRoutine">
-    <div>
+<g:form class="well" controller="transformation" action="createTransformationRoutine">
+    <div class="form-group">
         <label for="belongs_to">Parser:</label>
-        <g:select name="belongs_to" from="${DynamicParser.getAll()}" noSelection="[null: 'Please select a parser...']" optionKey="id" required="required" />
+        <g:select name="belongs_to" class="form-control" from="${DynamicParser.getAll()}" noSelection="[null: 'Please select a parser...']" optionKey="id" required="required" />
                   %{-- onchange="${remoteFunction(action: 'setRoutineProperties', update: "routineContainer", params: '\'parser=\' + this.value')};" />--}%
     </div>
-    <div>
+    <div class="form-group">
         <label for="target_object">Object:</label>
-        <g:select name="target_object" from="${params.domainList}" noSelection="[null : 'Please select a targetobject...']" required="required"/>
+        <g:select name="target_object" class="form-control" from="${params.domainList}" noSelection="[null : 'Please select a targetobject...']" required="required"/>
     </div>
-    <g:remoteLink action="setRoutineProperties" update="routineContainer" params="{parser: \$('#belongs_to').val(), targetObject: \$('#target_object').val()}">Submit selected</g:remoteLink>
-
+    <div>
+        <g:remoteLink class="btn btn-warning" action="setRoutineProperties" update="routineContainer" params="{parser: \$('#belongs_to').val(), targetObject: \$('#target_object').val()}">Submit selected</g:remoteLink>
+    </div>
     <div id="routineContainer">
     </div>
 </g:form>
@@ -20,6 +21,8 @@
     var updatePropertyCounter = 0;
 
     function verifyForm(){
+        alert("check");
+
         if($("#belongs_to").val() == "null"){
             alert("Please select a parser.");
             return false;

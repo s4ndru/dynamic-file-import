@@ -1,26 +1,30 @@
-<div>
-    <label for="to_update">Update existing:</label>
-    <g:checkBox name="to_update" value="true"/>
+<div class="checkbox">
+    <label for="to_update">
+        <g:checkBox name="to_update" value="true"/> Update existing
+    </label>
 </div>
 
-<div>
-    <g:field name="order_id" type="number" required="required" onchange="" min="0" placeholder="Sequence number"/>
+<div class="form-group">
+    <g:field name="order_id" class="form-control" type="number" required="required" min="0" placeholder="Sequence number"/>
 </div>
 
 <div>
     <label for="property_container">
         Properties of object to update:
         <div id="property_container">
-            <div id="update_properties">
+            <div id="update_properties" class="form-group">
                 <g:render template="transformationRoutineProperties" params="${params}" />
             </div>
-            <g:submitToRemote id="addPropertyBtn" type="button" url="[action: 'addPropertyPair']" update="update_properties" value="add propertypair"/>
+            <g:submitToRemote class="btn btn-warning" style="margin: 5px 0 5px 0" id="addPropertyBtn" type="button" url="[action: 'addPropertyPair']" update="update_properties" value="add propertypair"/>
             %{--<button type="button" id="addPropertyBtn" >add propertypair</button>--}%
         </div>
     </label>
 </div>
 
-<g:actionSubmit name="submitTransformationRoutine" id="submitTransformationRoutine" value="save TransformationRoutine" action="createTransformationRoutine" onclick="return verifyForm()" style="float: right;"/>
+<g:submitToRemote class="btn btn-primary pull-right" name="submitTransformationRoutine" id="submitTransformationRoutine" value="save TransformationRoutine"
+                  action="createTransformationRoutine" onclick="return verifyForm()" onFailure="alert(XMLHttpRequest.responseText)"
+                  onSuccess="alert('Routine was successfully saved!'); location.reload();"/>
+<div style="clear: both;"></div>
 
 
 <g:javascript>
@@ -43,4 +47,5 @@
 
         %{--$('#update_properties').append(div);--}%
     %{--});--}%
+
 </g:javascript>

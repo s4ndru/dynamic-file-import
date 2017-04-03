@@ -1,52 +1,18 @@
 <%@ page import="transformation.TransformationRoutine; transformation.MethodInfo" %>
 
-<g:form>
-    <div>
+<g:form class="well">
+    <div class="form-group">
         <label for="routine">Routine: </label>
-        <g:select from="${TransformationRoutine.getAll()}" noSelection="[null: 'please select a routine...']" id="routine" name="routine" required="required"/>
+        <g:select class="form-control" from="${TransformationRoutine.getAll()}" noSelection="[null: 'Please select a routine...']" optionKey="id" id="routine" name="routine" required="required"/>
     </div>
-    <div>
+    <div class="form-group">
         <label for="transformation_method">Methodname: </label>
-        <g:select from="${MethodInfo.values()}" noSelection="[null : 'please select a method...']" id="transformation_method" name="transformation_method" required="required"/>
-    </div>
-    <div>
-        <g:field name="order_id" type="number" min="0" required="required" placeholder="Sequence number"/>
-    </div>
-    <div>
-        <label for="is_repetitive">Repetitive procedure</label>
-        <g:checkBox name="is_repetitive" value="true"/>
+        <g:select class="form-control" from="${MethodInfo.values()}" noSelection="[null : 'Please select a method...']" id="transformation_method" name="transformation_method" required="required"/>
     </div>
 
-    <div>
-        <label for="notable_objects_container">
-            Notable parsing objects:
-            <div id="notable_objects_container">
-                <div id="notable_objects">
-                    <div id="notable_object0">
-                        <g:textField name="object_key0" id="object_key0" placeholder="propertykey" />
-                        <g:textField name="object_value0" id="object_value0" placeholder="propertyvalue" />
-                    </div>
-                </div>
-                <button type="button" id="addObjectBtn" >add objectpair</button>
-            </div>
-        </label>
-    </div>
+    <g:remoteLink class="btn btn-warning" action="setProcedureProperties" update="procedureContainer" params="{routine: \$('#routine').val(), method: \$('#transformation_method').val()}">Submit selected</g:remoteLink>
 
-    <div id="parameter_container_container">
-        <label id="parameter_container_label" for="parameter_container">
-            Method parameters:
-            <div id="parameter_container">
-                <div id="parameter_properties0">
-                    <div id="parameter_property0|0">
-                        <g:textField name="parameter_key0|0" id="parameter_key0|0" placeholder="parameterkey" />
-                        <g:textField name="parameter_value0|0" id="parameter_value0|0" placeholder="parametervalue" />
-                    </div>
-                </div>
-                <button type="button" id="addParamBtn0" >add parameterpair</button>
-                <hr>
-            </div>
-        </label>
-        <button type="button" id="addWrapperBtn" >add wrapper</button>
+    <div id="procedureContainer">
     </div>
 
 </g:form>
@@ -54,7 +20,7 @@
 <g:javascript>
     var notable_object_index = 0;
     $('#notable_objects_container').on('click', '#addObjectBtn', function(){
-        notable_object_index++
+        notable_object_index++;
 
         var div = document.createElement('div');
         div.id = 'parameter_property' + notable_object_index;
@@ -85,7 +51,7 @@
         $('#parameter_container').append(div);
 
         $('#parameter_container').on('click', '#addParamBtn' + wrapper_index, function(){
-            param_index++
+            param_index++;
 
             var div = document.createElement('div');
             div.id = 'parameter_property' + param_index;
@@ -97,7 +63,7 @@
     });
 
     $('#parameter_container').on('click', '#addParamBtn0', function(){
-        param_index++
+        param_index++;
 
         var div = document.createElement('div');
         div.id = 'parameter_property' + param_index;
@@ -106,5 +72,6 @@
 
         $('#parameter_properties0').append(div);
     });
+
 
 </g:javascript>

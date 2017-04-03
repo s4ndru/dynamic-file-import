@@ -22,7 +22,7 @@ enum MethodInfo {
     SAVEALL("saveAll"),
     SAVEALLWHERE("saveAllWhere")
 
-    LinkedHashMap<MethodInfo, Integer> wrapperCountMap =
+    static LinkedHashMap<String, Integer> wrapperCountMap =
             ["appendStringLeftToField": 1,
              "appendStringRightToField": 1,
              "splitStringField": 2,
@@ -49,8 +49,8 @@ enum MethodInfo {
         return propertyName
     }
 
-    Integer getWrapperCount(MethodInfo m){
-        return wrapperCountMap.get(m)
+    static Integer getWrapperCount(MethodInfo m){
+        return wrapperCountMap.get(m.toString())
     }
 
     static MethodInfo fromString(String text) {
