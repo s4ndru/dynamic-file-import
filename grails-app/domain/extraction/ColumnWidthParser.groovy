@@ -45,7 +45,7 @@ class ColumnWidthParser extends DynamicParser{
                     if(entry_it.trim)
                         entry = entry.trim();
 
-                    def boolean isParseable = false
+                    boolean isParseable = false
                     try {
                         isParseable = entry_it.checkType(entry)
                     }

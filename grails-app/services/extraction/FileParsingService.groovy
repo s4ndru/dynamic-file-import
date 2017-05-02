@@ -22,7 +22,7 @@ class FileParsingService {
                     ArrayList<Map<String, Object>> result = parser.parse(file)
                     File finished_dir = new File((file.absolutePath - file.name) + "parsed files")
                     finished_dir.mkdir()
-                    boolean fileMoved = file.renameTo(new File(finished_dir, file.getName()));
+                    boolean fileMoved = file.renameTo(new File(finished_dir, file.getName()))
                     if(!fileMoved)
                         // TODO exception
                         println("exception!")

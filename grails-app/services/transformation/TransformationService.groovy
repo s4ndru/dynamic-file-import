@@ -126,8 +126,9 @@ class TransformationService {
 
     //// Simple Transformation methods /////////////////////////////////////////////////////////////////////////////////
     // TODO check everywhere if enough SortedSets and params are specified
+    // TODO check if targetobject/class hast a list and perform operation for every object in list
 
-    // Params:  1. Set: [propertyname in datum : value to append]
+    // Params:  1. Set: [propertyname in datum : value to append] => repeat X times
     static def appendStringLeftToField(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance){
         def parameters = procedure.parameterWrappers.first().parameters.first()
         parameters.each{ parameter ->
@@ -136,7 +137,7 @@ class TransformationService {
         return [datum, null]
     }
 
-    // Params:  1. Set: [propertyname in datum : value to append]
+    // Params:  1. Set: [propertyname in datum : value to append] => repeat X times
     static def appendStringRightToField(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance){
         def parameters = procedure.parameterWrappers.first().parameters.first()
         parameters.each{ parameter ->
@@ -270,6 +271,8 @@ class TransformationService {
         // TODO: exception
             println("exception!")
 
+
+        //TODO: check if we don't have to put a empty element into datum first
         //find object with built criteria
         datum[params[0].left_value] = found_objects[0]
 
@@ -313,15 +316,16 @@ class TransformationService {
 
 
     // TODO: note => first set is always the name of the property in the target class. This is important for createNewProcedure
+    // TODO: For the UI, ask which transformationmethod and then set the parameters accordingly to the params
     // The new procedure will only be called last in the transformationroutine to prevent runtime inconsistencies.
     // E.g. it's not possible to call it early, if the corresponding data is not the first entry in a file.
     // Params:  1. Set: [transformationmethod-name : is repetitive("true"/"false")],
     //          and "notable objects": ["name of field", "value"] => repeat X times
     //          2. Set: [propertyname of a class : name of field in datum, in which the value is saved]
-    // cont. => basically fishing parameters from the current datum, as a fixed value, for the next procedure => repeat X times
-    // cont. #2 => this is the whole reason why we need the whole "createNewProcedure" sequence.
+    //              cont. => basically fishing parameters from the current datum, as a fixed value, for the next procedure => repeat X times
+    //              cont. #2 => this is the whole reason why we need the whole "createNewProcedure" sequence.
     //          3. Set (optional): [left value of parameter for procedure : right value of parameter for procedure]
-    // cont. => just passing on parameters to the next procedure, which might be needed
+    //              cont. => just passing on parameters to the next procedure, which might be needed => repeat X times
     static def createNewTemporaryProcedure(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
         def params_procedure = procedure.parameterWrappers.first().parameters.asList()
         def runtime_params = procedure.parameterWrappers.asList()[1].parameters.asList()
@@ -395,7 +399,7 @@ class TransformationService {
         //find object with built criteria
         object_instance[params[0].left_value] = target_class.find(instance)
         // eg params[0].left_value= responsibility
-        //object_instance is object from class ColumnWidthTest so columWidthTest["responsibility"]=TestResponisbility.find(object with criteria name =  **AM_NEU**
+        //object_instance is object from class ColumnWidthTest so columWidthTest["responsibility"]=TestResponsibility.find(object with criteria name =  **AM_NEU**
         object_instance.save(flush: true)
 
         //datum ... Map of String of one tableLine
@@ -403,7 +407,7 @@ class TransformationService {
         return [datum, object_instance]
     }
 
-    // Params:  1. Set: [propertyname in target class : value for the property]
+    // Params:  1. Set: [propertyname in target class : value for the property] => repeat X times
     static def crossAddValue(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
         def value_map = procedure.parameterWrappers.asList()[0].parameters.asList()
 
@@ -414,7 +418,7 @@ class TransformationService {
             else if(it.right_value != null)
                 object_instance[it.left_value] = it.right_value
             else
-                println("wtf!")
+                println("Should never arrive here!")
         }
 
         object_instance.save(flush: true)
@@ -423,7 +427,7 @@ class TransformationService {
     }
 
     // Loading methods ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Params:  1. Set: [propertyname of target class : propertyvalue] => repeat Entry 1 for each additional property
+    // Params:  1. Set: [propertyname of target class : name of field in datum] => repeat X times
     static def identityTransfer(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
         def IO_map = procedure.parameterWrappers.first().parameters.asList()
 

@@ -5,39 +5,32 @@ import extraction.DynamicParser
 
 class TransformationController {
 
-    def createProcedure() {
-        /*LinkedHashMap<Long, String> routines = [:]
-
-        TransformationRoutine.getAll().eachWithIndex{ it, index ->
-            def parser = DynamicParser.find("from DynamicParser where ? in elements(routines)", [it])
-            routines.put(it.id, "Routine #" + it.order_id + " for '" + it.target_object + "' in parser '" + parser.name + "'")
-        }
-
-        params.routines = routines*/
-
-        render(view: "/testing/procedure_test", params: params)
-    }
-
     def setProcedureProperties(){
         //TODO
-        DynamicParser parser = DynamicParser.get(Integer.parseInt((String)params.parser))
-        params.entries = parser.entries.field
+        TransformationRoutine routine = TransformationRoutine.get(Integer.parseInt((String)params.routine))
 
-        MethodInfo.fromString((String)params["method"])
+        // We get all parsers, under which this routine exists.
+        // This means a routine with its procedures could be applied for different parsers which deliver the same result.
+        List<DynamicParser> parsers = DynamicParser.withCriteria{
+            routines{
+                idEq(routine.id)
+            }
+        }
+
+        params.entries = parsers.entries.field.flatten()
         params.wrapperCount = MethodInfo.getWrapperCount(MethodInfo.fromString((String)params["method"]))
 
+        params.method = params["method"]
+
+        for(int i = 0; i < (Integer)params.wrapperCount; i++)
+            if(MethodInfo.isFromObject((String)params["method"], i))
+            // TODO: might be a problem if we wort with the short name and not the full name, when finding our target_object
+                params.objectFields = grailsApplication.getArtefacts("Domain").find{it.shortName == routine.target_object}.persistantProperties.name
+            else if(MethodInfo.isDatum((String)params["method"], i))
+                params.dataFields = params.entries
+
+        // TODO: special stuff for createNewTemporaryProcedure, if yes, find out the type of the parameters
         render(template: "createTransformationProcedureSubElements", params: params)
-    }
-
-    def createRoutine() {
-        def domainList = grailsApplication.getArtefacts("Domain")*.clazz
-
-        // TODO only remove our parsing stuff, not everything from those packages.
-        domainList.removeAll{it.name.contains("extraction") || it.name.contains("transformation")}
-        params.domainList = []
-        domainList.each{params.domainList.add(it.name)}
-
-        render(view: "/testing/routine_test", params: params)
     }
 
     def setRoutineProperties(){
@@ -134,6 +127,7 @@ class TransformationController {
         render(status: 200)
     }
 
+    // TODO: catch already given sequencenumber
     def createTransformationProcedure(){
 
         TransformationProcedure tp = new TransformationProcedure()

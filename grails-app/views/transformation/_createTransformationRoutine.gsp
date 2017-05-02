@@ -1,4 +1,7 @@
 <%@ page import="extraction.DynamicParser" %>
+
+<link rel="stylesheet" href="${resource(dir: 'css', file: 'styling.css')}" type="text/css">
+
 <g:form class="well" controller="transformation" action="createTransformationRoutine">
     <div class="form-group">
         <label for="belongs_to">Parser:</label>
@@ -10,7 +13,7 @@
         <g:select name="target_object" class="form-control" from="${params.domainList}" noSelection="[null : 'Please select a targetobject...']" required="required"/>
     </div>
     <div>
-        <g:remoteLink class="btn btn-warning" action="setRoutineProperties" update="routineContainer" params="{parser: \$('#belongs_to').val(), targetObject: \$('#target_object').val()}">Submit selected</g:remoteLink>
+        <g:remoteLink class="btn btn-warning" action="setRoutineProperties" controller="Transformation" update="routineContainer" params="{parser: \$('#belongs_to').val(), targetObject: \$('#target_object').val()}">Submit selected</g:remoteLink>
     </div>
     <div id="routineContainer">
     </div>

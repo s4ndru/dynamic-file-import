@@ -97,7 +97,7 @@ class TokenSplitParser extends DynamicParser{
 
                                 // Is the entry parseable, if not => User specified something wrong?
                                 // If the entry is optional, no problem if not parseable.
-                                def boolean isParseable
+                                boolean isParseable
                                 try {
                                     isParseable = (entry_it.checkType(entry))
                                 }
