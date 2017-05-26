@@ -31,8 +31,9 @@
     });
 
     function appendColumnWidthEntry(index){
-        $("#entry" + index).append('<input class="form-control" name="columnStart' + index + '" placeholder="Column start" value="" id="columnStart' + index + '" type="text"> ');
-        $("#entry" + index).append('<input class="form-control" name="columnEnd' + index + '" placeholder="Column end" value="" id="columnEnd' + index + '" type="text"> ');
+        $("#entry" + index).append('<div class="form-group" style="width: 100%"><input class="form-control" style="width: 48%" name="columnStart' + index + '" placeholder="Column start" value="" id="columnStart' + index + '" type="text"/> ' +
+                '<input class="form-control" style="width: 48%" name="columnEnd' + index + '" placeholder="Column end" value="" id="columnEnd' + index + '" type="text"/></div>');
+        //$("#entry" + index).append();
 
         if(index == 0)
             $("#entry" + index).append('<label>(Eg. 1-5, 5-12, 12-25)</label>');

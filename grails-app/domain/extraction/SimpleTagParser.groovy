@@ -39,6 +39,7 @@ class SimpleTagParser extends DynamicParser{
                 if(m.find()) {
                     String matchedLine = m.group(2)
 
+                    // TODO: Implement a string to check when end of range is reached
                     if(isEntryParsedMap.get(entry_it)){
                         allObjects.add(objectMap)
                         objectMap = [:]
@@ -48,12 +49,15 @@ class SimpleTagParser extends DynamicParser{
                         }
                     }
 
+                    // TODO: Implement multiline read when endtag is not null but did not appear in the same line
+
                     isEntryParsedMap.put(entry_it, true)
 
                     try {
                         entry_it.checkType(matchedLine)
                     }
                     catch (ParserUnfitException e) {
+                        // TODO throw new with additional info
                         throw e
                     }
 

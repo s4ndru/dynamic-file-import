@@ -11,7 +11,7 @@ environments {
             pooled = true
             driverClassName = "com.mysql.jdbc.Driver"
             username = "root"
-            password = "L1nk1n2"
+            password = "49eftech50.-"
             url = "jdbc:mysql://localhost:3306/bakk_schema"
         }
     }

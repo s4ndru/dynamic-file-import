@@ -14,8 +14,8 @@
         <div id="notable_objects_container">
             <div id="notable_objects">
                 <div id="notable_object0">
-                    <g:select name="object_key0" from="${params.entries}" noSelection="[null : 'Please select a entry...']"/>
-                    <g:textField name="object_value0" id="object_value0" placeholder="propertyvalue" />
+                    <g:select name="object_key0" from="${params.entries}" noSelection="[null : 'Please select a entry...']" style="width: 48%"/>
+                    <g:textField name="object_value0" id="object_value0" placeholder="propertyvalue" style="width: 48%"/>
                 </div>
             </div>
             <button type="button" id="addObjectBtn" onclick="addNotableObject();">add objectpair</button>
@@ -31,23 +31,25 @@
                 <div id="parameter_properties${i}">
                     <div id="parameter_property${i}_0">
                         <g:if test="${MethodInfo.isFromObject((String)params.method, i)}">
-                            <g:select name="parameter_key${i}_0" id="parameter_key${i}_0" from="${params.objectFields}"
+                            <g:select name="parameter_key${i}_0" id="parameter_key${i}_0" from="${params.objectFields}" style="width: 48%"
                                       noSelection="[null : 'Please select a entry..']" placeholder="parameterkey" />
                         </g:if>
-                        <g:elseif test="${MethodInfo.isDatum((String)params.method, i) && (MethodInfo.getDatumSetPosition((String)params.method) == null ? true : MethodInfo.getDatumSetPosition((String)params.method).contains(0))}">
-                            <g:select name="parameter_key${i}_0" id="parameter_key${i}_0" from="${params.entries}"
+                        <g:elseif test="${MethodInfo.isDatum((String)params.method, i) &&
+                                (MethodInfo.getDatumSetPosition((String)params.method) == null ? true : MethodInfo.getDatumSetPosition((String)params.method).contains(0))}">
+                            <g:select name="parameter_key${i}_0" id="parameter_key${i}_0" from="${params.entries}" style="width: 48%"
                                       noSelection="[null : 'Please select a datum...']" placeholder="parameterkey" />
                         </g:elseif>
                         <g:else>
-                            <g:textField name="parameter_key${i}_0" id="parameter_key${i}_0" placeholder="parameterkey" />
+                            <g:textField name="parameter_key${i}_0" id="parameter_key${i}_0" placeholder="parameterkey" style="width: 48%" />
                         </g:else>
 
-                        <g:if test="${MethodInfo.isDatum((String)params.method, i) && (MethodInfo.getDatumSetPosition((String)params.method) == null ? false : MethodInfo.getDatumSetPosition((String)params.method).contains(1))}">
-                            <g:select name="parameter_value${i}_0" id="parameter_value${i}_0" from="${params.entries}"
+                        <g:if test="${MethodInfo.isDatum((String)params.method, i) &&
+                                (MethodInfo.getDatumSetPosition((String)params.method) == null ? false : MethodInfo.getDatumSetPosition((String)params.method).contains(1))}">
+                            <g:select name="parameter_value${i}_0" id="parameter_value${i}_0" from="${params.entries}" style="width: 48%"
                                       noSelection="[null : 'Please select a datum...']" placeholder="parametervalue" />
                         </g:if>
                         <g:else>
-                            <g:textField name="parameter_value${i}_0" id="parameter_value${i}_0" placeholder="parametervalue" />
+                            <g:textField name="parameter_value${i}_0" id="parameter_value${i}_0" placeholder="parametervalue" style="width: 48%" />
                         </g:else>
 
                     </div>

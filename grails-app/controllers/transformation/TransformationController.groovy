@@ -24,7 +24,7 @@ class TransformationController {
 
         for(int i = 0; i < (Integer)params.wrapperCount; i++)
             if(MethodInfo.isFromObject((String)params["method"], i))
-            // TODO: might be a problem if we wort with the short name and not the full name, when finding our target_object
+            // TODO: might be a problem if we work with the short name and not the full name, when finding our target_object
                 params.objectFields = grailsApplication.getArtefacts("Domain").find{it.shortName == routine.target_object}.persistantProperties.name
             else if(MethodInfo.isDatum((String)params["method"], i))
                 params.dataFields = params.entries

@@ -20,7 +20,8 @@
         %{--<g:render template="/transformation/selectRoutines"/>--}%
     %{--</div>--}%
 
-    <g:actionSubmit name="submitTokenSplitParser" id="submitTokenSplitParser" value="save parser" action="createTokenSplitParser" onclick="return verifyForm()"/>
+    <g:actionSubmit class="btn btn-primary pull-right" name="submitTokenSplitParser" id="submitTokenSplitParser" value="save parser" action="createTokenSplitParser" onclick="return verifyForm()"/>
+    <div style="clear: both;"></div>
 </g:form>
 
 <g:javascript>
