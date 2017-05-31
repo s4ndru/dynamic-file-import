@@ -22,19 +22,4 @@ abstract class DynamicParser {
         // TODO check at creation if combination is unique
         return file.name.contains(selectorFileType.toString()) && file.name.contains(selectorName)
     }
-
-    def parseField(String field, String value){
-        def entry = entries.find{it.field == field}
-
-        if(entry.dataType == EntryDatatype.INTEGER){
-            return Integer.parseInt(value)
-        }
-        else if(entry.dataType == EntryDatatype.FLOAT){
-            return Float.parseFloat(value)
-        }
-        else if(entry.dataType == EntryDatatype.STRING){
-            return value
-        }
-    }
-
 }

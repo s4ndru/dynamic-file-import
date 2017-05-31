@@ -54,9 +54,9 @@ class ColumnWidthParser extends DynamicParser{
                             throw e
                     }
 
-                    // Is this entry parseable? Yes? To the objectMap it goes.
+                    // Is this entry parseable? Yes? To the objectMap it goes. No? TODO Why did I just add it to the map anyways?
                     if(isParseable)
-                        objectMap.put(entry_it.field, parseField(entry_it.field, entry))
+                        objectMap.put(entry_it.field, entry_it.parseField(entry))
                     else
                         objectMap.put(entry_it.field, entry)
                 }

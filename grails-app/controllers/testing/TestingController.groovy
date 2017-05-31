@@ -428,9 +428,9 @@ class TestingController {
         temp.routines.add(tr2)
         temp.save(flush: true)*/
 
-        ArrayList<SimpleTagEntry> stp_array = new ArrayList<SimpleTagEntry>()
-        stp_array.add(new SimpleTagEntry(field: "custom_value", repetetive: true, dataType: EntryDatatype.STRING, startTag: "\"custom_value\": \"", endTag: "\",", endTagOptional: false))
-        stp_array.add(new SimpleTagEntry(field: "timestamp", repetetive: true, dataType: EntryDatatype.STRING, startTag: "\"timestamp\": \"" , endTag: "\"", endTagOptional: false))
+        /*ArrayList<SimpleTagEntry> stp_array = new ArrayList<SimpleTagEntry>()
+        stp_array.add(new SimpleTagEntry(field: "custom_value", dataType: EntryDatatype.STRING, startTag: "\"custom_value\": \"", endTag: "\",", optional: true))
+        stp_array.add(new SimpleTagEntry(field: "timestamp", dataType: EntryDatatype.STRING, startTag: "\"timestamp\": \"" , endTag: "\""))
 
         SimpleTagParser stp = new SimpleTagParser(selectorName: "json", selectorFileType: AllowedFiletype.TXT, name: "Jsonparser", description: "Tagparser for simple json files.", entries: stp_array)
 
@@ -451,6 +451,155 @@ class TestingController {
 
         TransformationRoutine stp_tr = new TransformationRoutine(order_id: 1, is_repetitive: true, notable_objects: null,
                 target_object: "SimpleTagTest", procedures: [stp_tp])
+        stp_tr.save(flush: true)
+
+        stp.routines.add(stp_tr)
+        stp.save(flush:true)*/
+
+
+
+        /*ArrayList<SimpleTagEntry> stp_array = new ArrayList<SimpleTagEntry>()
+        stp_array.add(new SimpleTagEntry(field: "arrivalTime", dataType: EntryDatatype.FLOAT, startTag: "\"arrivalTime\": ", endTag: ","))
+        stp_array.add(new SimpleTagEntry(field: "boolValue", dataType: EntryDatatype.BOOLEAN, startTag: "\"boolValue\": " , endTag: ","))
+        stp_array.add(new SimpleTagEntry(field: "timestamp", dataType: EntryDatatype.FLOAT, startTag: "\"timestamp\": "))
+
+        SimpleTagParser stp = new SimpleTagParser(selectorName: "environment", selectorFileType: AllowedFiletype.JSON,
+                name: "Jsonparser 2", description: "Tagparser json file with bool value.", entries: stp_array, domainStartTag: "{", domainEndTag: "}")
+
+        TransformationProcedure stp_tp = new TransformationProcedure(order_id: 0, transformation_method: TransformationService.&identityTransfer)
+        TreeSet<ParamEntry> stp_params = new TreeSet<ParamEntry>()
+        ParamEntry stp_pe = new ParamEntry("arrivalTime", "arrivalTime")
+        stp_pe.save(flush: true)
+        stp_params.add(stp_pe)
+        stp_pe = new ParamEntry("timestamp", "timestamp")
+        stp_pe.save(flush: true)
+        stp_params.add(stp_pe)
+        stp_pe = new ParamEntry("boolValue", "boolValue")
+        stp_pe.save(flush: true)
+        stp_params.add(stp_pe)
+
+        ParamEntryWrapper stp_pw = new ParamEntryWrapper(stp_params)
+        stp_pw.save(flush: true)
+        stp_tp.parameterWrappers.add(stp_pw)
+
+        stp_tp.save(flush: true)
+
+        TransformationRoutine stp_tr = new TransformationRoutine(order_id: 1, is_repetitive: true, notable_objects: null,
+                target_object: "SimpleTagTestBoolean", procedures: [stp_tp])
+        stp_tr.save(flush: true)
+
+        stp.routines.add(stp_tr)
+        stp.save(flush:true)
+
+
+        // task_id, task_name, timestamp, url
+
+        stp_array = new ArrayList<SimpleTagEntry>()
+        stp_array.add(new SimpleTagEntry(field: "task_id", dataType: EntryDatatype.INTEGER, startTag: "\"task_id\": ", endTag: ","))
+        stp_array.add(new SimpleTagEntry(field: "task_name", dataType: EntryDatatype.STRING, startTag: "\"task_name\": \"" , endTag: "\","))
+        stp_array.add(new SimpleTagEntry(field: "timestamp", dataType: EntryDatatype.LONG, startTag: "\"timestamp\": ", endTag: ","))
+        stp_array.add(new SimpleTagEntry(field: "url", dataType: EntryDatatype.STRING, startTag: "\"url\": \"", endTag: "\","))
+
+        stp = new SimpleTagParser(selectorName: "queries", selectorFileType: AllowedFiletype.JSON, name: "Jsonparser 2",
+                description: "Tagparser for file which only has a single line with all entries.", entries: stp_array, domainStartTag: "{", domainEndTag: "}")
+
+        stp_tp = new TransformationProcedure(order_id: 0, transformation_method: TransformationService.&identityTransfer)
+        stp_params = new TreeSet<ParamEntry>()
+        stp_pe = new ParamEntry("task_id", "task_id")
+        stp_pe.save(flush: true)
+        stp_params.add(stp_pe)
+        stp_pe = new ParamEntry("timestamp", "timestamp")
+        stp_pe.save(flush: true)
+        stp_params.add(stp_pe)
+        stp_pe = new ParamEntry("task_name", "task_name")
+        stp_pe.save(flush: true)
+        stp_params.add(stp_pe)
+        stp_pe = new ParamEntry("url", "url")
+        stp_pe.save(flush: true)
+        stp_params.add(stp_pe)
+
+        stp_pw = new ParamEntryWrapper(stp_params)
+        stp_pw.save(flush: true)
+        stp_tp.parameterWrappers.add(stp_pw)
+
+        stp_tp.save(flush: true)
+
+        stp_tr = new TransformationRoutine(order_id: 1, is_repetitive: true, notable_objects: null,
+                target_object: "SimpleTagTestSingleLine", procedures: [stp_tp])
+        stp_tr.save(flush: true)
+
+        stp.routines.add(stp_tr)
+        stp.save(flush:true)*/
+
+        /*ArrayList<SimpleTagEntry> stp_array = new ArrayList<SimpleTagEntry>()
+        stp_array.add(new SimpleTagEntry(field: "task_id", dataType: EntryDatatype.INTEGER, startTag: "\"task_id\": ", endTag: ","))
+        stp_array.add(new SimpleTagEntry(field: "task_name", dataType: EntryDatatype.STRING, startTag: "\"task_name\": \"" , endTag: "\","))
+        stp_array.add(new SimpleTagEntry(field: "timestamp", dataType: EntryDatatype.LONG, startTag: "\"timestamp\": ", endTag: ","))
+        stp_array.add(new SimpleTagEntry(field: "url", dataType: EntryDatatype.STRING, startTag: "\"url\": \"", endTag: "\","))
+
+        SimpleTagParser stp = new SimpleTagParser(selectorName: "queries", selectorFileType: AllowedFiletype.TXT, name: "Jsonparser txt-testversion",
+                description: "Tagparser for file which only has a single line with all entries.", entries: stp_array)
+
+        TransformationProcedure stp_tp = new TransformationProcedure(order_id: 0, transformation_method: TransformationService.&identityTransfer)
+        TreeSet<ParamEntry> stp_params = new TreeSet<ParamEntry>()
+        ParamEntry stp_pe = new ParamEntry("task_id", "task_id")
+        stp_pe.save(flush: true)
+        stp_params.add(stp_pe)
+        stp_pe = new ParamEntry("timestamp", "timestamp")
+        stp_pe.save(flush: true)
+        stp_params.add(stp_pe)
+        stp_pe = new ParamEntry("task_name", "task_name")
+        stp_pe.save(flush: true)
+        stp_params.add(stp_pe)
+        stp_pe = new ParamEntry("url", "url")
+        stp_pe.save(flush: true)
+        stp_params.add(stp_pe)
+
+        ParamEntryWrapper stp_pw = new ParamEntryWrapper(stp_params)
+        stp_pw.save(flush: true)
+        stp_tp.parameterWrappers.add(stp_pw)
+
+        stp_tp.save(flush: true)
+
+        TransformationRoutine stp_tr = new TransformationRoutine(order_id: 1, is_repetitive: true, notable_objects: null,
+                target_object: "SimpleTagTestSingleLine", procedures: [stp_tp])
+        stp_tr.save(flush: true)
+
+        stp.routines.add(stp_tr)
+        stp.save(flush:true)*/
+
+        ArrayList<SimpleTagEntry> stp_array = new ArrayList<SimpleTagEntry>()
+        stp_array.add(new SimpleTagEntry(field: "arrivalTime", dataType: EntryDatatype.FLOAT, startTag: "\"arrivalTime\": ", endTag: ","))
+        stp_array.add(new SimpleTagEntry(field: "boolValue", dataType: EntryDatatype.BOOLEAN, startTag: "\"boolValue\": " , endTag: ","))
+        stp_array.add(new SimpleTagEntry(field: "timestamp", dataType: EntryDatatype.FLOAT, startTag: "\"timestamp\": "))
+        stp_array.add(new SimpleTagEntry(field: "type", dataType: EntryDatatype.STRING, startTag: "\"type\": \"", endTag: "\","))
+
+        SimpleTagParser stp = new SimpleTagParser(selectorName: "multiline", selectorFileType: AllowedFiletype.JSON,
+                name: "Jsonparser 2", description: "Tagparser json multiline file", entries: stp_array, domainStartTag: "{", domainEndTag: "}")
+
+        TransformationProcedure stp_tp = new TransformationProcedure(order_id: 0, transformation_method: TransformationService.&identityTransfer)
+        TreeSet<ParamEntry> stp_params = new TreeSet<ParamEntry>()
+        ParamEntry stp_pe = new ParamEntry("arrivalTime", "arrivalTime")
+        stp_pe.save(flush: true)
+        stp_params.add(stp_pe)
+        stp_pe = new ParamEntry("timestamp", "timestamp")
+        stp_pe.save(flush: true)
+        stp_params.add(stp_pe)
+        stp_pe = new ParamEntry("boolValue", "boolValue")
+        stp_pe.save(flush: true)
+        stp_params.add(stp_pe)
+        stp_pe = new ParamEntry("type", "type")
+        stp_pe.save(flush: true)
+        stp_params.add(stp_pe)
+
+        ParamEntryWrapper stp_pw = new ParamEntryWrapper(stp_params)
+        stp_pw.save(flush: true)
+        stp_tp.parameterWrappers.add(stp_pw)
+
+        stp_tp.save(flush: true)
+
+        TransformationRoutine stp_tr = new TransformationRoutine(order_id: 1, is_repetitive: true, notable_objects: null,
+                target_object: "SimpleTagTestBoolean", procedures: [stp_tp])
         stp_tr.save(flush: true)
 
         stp.routines.add(stp_tr)

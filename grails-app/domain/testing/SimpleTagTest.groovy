@@ -5,7 +5,7 @@ class SimpleTagTest {
     String timestamp
 
     static constraints = {
-        value nullable: false
-        timestamp nullable: false
+        value nullable: true
+        timestamp nullable: true
     }
 }

@@ -4,8 +4,11 @@ import testing.TestingController
 
 class ExtractionController {
 
+
+    // TODO Move to service
+
     def parseFiles(){
-        TestingController.bootstrap()
+        //TestingController.bootstrap()
 
         File dir = new File((String)params.filesPath)
         ArrayList<ArrayList<Map<String, String>>> results = FileParsingService.parseAllFilesInDirectory(dir)

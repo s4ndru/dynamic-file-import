@@ -14,6 +14,7 @@ class TokenSplitParser extends DynamicParser{
         name(blank: false)
     }
 
+    // TODO: Test this, since I refactored the code recently
     @Override
     ArrayList<Map<String, Object>> parse(File file) throws ParserUnfitException, ParserInconsistentException {
 
@@ -71,11 +72,11 @@ class TokenSplitParser extends DynamicParser{
                                 if (isParseable) {
                                     if (objectMapHelperMap.get(index_it) == null) {
                                         // No fitting parsing for now, add it.
-                                        objectMapHelperMap.put(index_it, [entry_it.field, multipleCounter, entry, entry_it.dataType, entry_it.multiple])
+                                        objectMapHelperMap.put(index_it, [entry_it.field, multipleCounter, entry_it.parseField(entry), entry_it.multiple])
                                         multipleCounter++
                                     } else if (objectMapHelperMap.get(index_it)[3] == EntryDatatype.STRING && entry_it.dataType != EntryDatatype.STRING) {
                                         // The previous entryParser is String, and this one is more specific => replace
-                                        objectMapHelperMap.put(index_it, [entry_it.field, multipleCounter, entry, entry_it.dataType, entry_it.multiple])
+                                        objectMapHelperMap.put(index_it, [entry_it.field, multipleCounter, entry_it.parseField(entry), entry_it.multiple])
                                         multipleCounter++
                                     } else if (entry_it.dataType != EntryDatatype.STRING && objectMapHelperMap.get(index_it)[3] != EntryDatatype.STRING) {
                                         throw new ParserInconsistentException("Parser is not deterministic! Multiple options to parse a entry")
@@ -109,9 +110,9 @@ class TokenSplitParser extends DynamicParser{
                                 // Immediately add the entry for the field. No identical field can occur for this line
                                 if (isParseable) {
                                     if (objectMapHelperMap.get(index) == null) {
-                                        objectMapHelperMap.put(index, [entry_it.field, null, entry, entry_it.dataType, entry_it.multiple])
+                                        objectMapHelperMap.put(index, [entry_it.field, null, entry_it.parseField(entry), entry_it.multiple])
                                     } else if (objectMapHelperMap.get(index)[3] == EntryDatatype.STRING && entry_it.dataType != EntryDatatype.STRING) {
-                                        objectMapHelperMap.put(index, [entry_it.field, null, entry, entry_it.dataType, entry_it.multiple])
+                                        objectMapHelperMap.put(index, [entry_it.field, null, entry_it.parseField(entry), entry_it.multiple])
                                     } else if (entry_it.dataType != EntryDatatype.STRING && objectMapHelperMap.get(index)[3] != EntryDatatype.STRING) {
                                         throw new ParserInconsistentException("Parser is not deterministic! Multiple options to parse a entry")
                                     } else if (entry_it.dataType == objectMapHelperMap.get(index)[3]) {
@@ -127,10 +128,10 @@ class TokenSplitParser extends DynamicParser{
                 objectMapHelperMap.each{ k, v ->
                     // Parse string to respective datatype
                     String field = v[0]
-                    def value = parseField(field, (String)v[2])
+                    def value = v[2]
 
                     // Multiple? Add entry as list
-                    if(v[4] == true)
+                    if(v[3] == true)
                         objectMap.put(field + "${v[1]}", value)
                         //objectMap.put(field + "[${v[1]}]", value)
                     else

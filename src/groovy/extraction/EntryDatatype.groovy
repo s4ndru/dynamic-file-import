@@ -4,7 +4,7 @@ package extraction;
  * Created by s4ndru on 04/04/2016.
  */
 enum EntryDatatype {
-    STRING("String"), INTEGER("Integer"), FLOAT("Float") //, DATE("date")
+    STRING("String"), INTEGER("Integer"), FLOAT("Float"), BOOLEAN("Boolean"), LONG("Long") //, DATE("date")
 
     String propertyName
 

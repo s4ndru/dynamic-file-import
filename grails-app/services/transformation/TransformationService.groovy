@@ -3,7 +3,6 @@ package transformation
 import extraction.*
 import grails.util.Holders
 import org.codehaus.groovy.runtime.MethodClosure
-import testing.*
 
 class TransformationService {
 
@@ -126,7 +125,7 @@ class TransformationService {
 
     //// Simple Transformation methods /////////////////////////////////////////////////////////////////////////////////
     // TODO check everywhere if enough SortedSets and params are specified
-    // TODO check if targetobject/class hast a list and perform operation for every object in list
+    // TODO check if targetobject/class hast a list and perform operation for every object in list (arrays)
 
     // Params:  1. Set: [propertyname in datum : value to append] => repeat X times
     static def appendStringLeftToField(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance){
@@ -426,6 +425,7 @@ class TransformationService {
         return [datum, object_instance]
     }
 
+    // TODO think long and hard if i need a "concatenate"-flag for when loading into db
     // Loading methods ////////////////////////////////////////////////////////////////////////////////////////////////
     // Params:  1. Set: [propertyname of target class : name of field in datum] => repeat X times
     static def identityTransfer(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
@@ -451,6 +451,9 @@ class TransformationService {
         }
 
         object_instance.save(flush: true)
+
+        if(object_instance.hasErrors())
+            throw new ConstraintException("There was an error while loading the data into the database. Maybe some constraints are not fulfilled?")
 
         return [datum, object_instance]
 

@@ -5,7 +5,7 @@ abstract class DynamicParserEntry{
 
     String field
     boolean optional = false
-    boolean trim = false
+    boolean trim = false // TODO remove this. Should be in transformation methods
     EntryDatatype dataType
 
     static constraints = {
@@ -32,6 +32,18 @@ abstract class DynamicParserEntry{
                 throw new ParserUnfitException("Expected entry of type 'integer' in file", e.cause)
             }
         }
+        if(dataType == EntryDatatype.LONG){
+            try{
+                Long.parseLong(type)
+                return true
+            }
+            catch(NumberFormatException e){
+                if(optional)
+                    return false
+
+                throw new ParserUnfitException("Expected entry of type 'integer' in file", e.cause)
+            }
+        }
         else if(dataType == EntryDatatype.FLOAT){
             try{
                 Float.parseFloat(type)
@@ -44,10 +56,40 @@ abstract class DynamicParserEntry{
                 throw new ParserUnfitException("Expected entry of type 'float' in file", e.cause)
             }
         }
+        else if(dataType == EntryDatatype.BOOLEAN){
+            try{
+                Boolean.parseBoolean(type)
+                return true
+            }
+            catch(NumberFormatException e){
+                if(optional)
+                    return false
+
+                throw new ParserUnfitException("Expected entry of type 'boolean' in file", e.cause)
+            }
+        }
         else if(dataType == EntryDatatype.STRING){
             return true
         }
 
         return false
+    }
+
+    def parseField(String value){
+        if(dataType == EntryDatatype.INTEGER){
+            return Integer.parseInt(value)
+        }
+        else if(dataType == EntryDatatype.LONG){
+            return Long.parseLong(value)
+        }
+        else if(dataType == EntryDatatype.FLOAT){
+            return Float.parseFloat(value)
+        }
+        else if(dataType == EntryDatatype.BOOLEAN){
+            return Boolean.parseBoolean(value)
+        }
+        else if(dataType == EntryDatatype.STRING){
+            return value
+        }
     }
 }
