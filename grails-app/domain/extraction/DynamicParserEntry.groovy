@@ -1,7 +1,7 @@
 package extraction
 
 // The FileEntryParser represents an Entry in a File, for the FileParser
-abstract class DynamicParserEntry{
+abstract class DynamicParserEntry implements Comparable{
 
     String field
     boolean optional = false
@@ -91,5 +91,13 @@ abstract class DynamicParserEntry{
         else if(dataType == EntryDatatype.STRING){
             return value
         }
+    }
+
+    static mapping = {
+        sort id: "asc"
+    }
+
+    int compareTo(obj) {
+        id.compareTo((obj as DynamicParserEntry).id)
     }
 }

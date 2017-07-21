@@ -17,28 +17,39 @@ class SimpleTagParser extends DynamicParser{
 
 
     // TODO: parse arrays in files
+    // TODO: parse nested level
+
     @Override
     ArrayList<Map<String, String>> parse(File file) throws ParserUnfitException, ParserInconsistentException {
 
-        // Every entry in this array resembles an object. In our case its a map/dictionary, which we will use for further DB-mapping
         def input = file
+        // Every entry in this array resembles an object. In our case its a map/dictionary, which we will use for further DB-mapping
         ArrayList<Map<String, Object>> allObjects = new ArrayList<Map<String, Object>>()
         Map<String, Object> objectMap = [:]
         Map<DynamicParserEntry, Pattern> patterns = [:]
         Map<DynamicParserEntry, Pattern> patternsNoEndTag = [:]
-        Map<DynamicParserEntry, Pattern> patternsDomainEndTag = [:]
         Matcher m, m_Multi
         Map<DynamicParserEntry, Boolean> isEntryParsedMap = [:]
         int nestedCounter = 0
         int nestedLevel = -1
         DynamicParserEntry multilineEntry = null
-        StringBuilder multilineConcat = new StringBuilder("")
+        StringBuilder multilineConcat = null
         Boolean singleLineFile = false
         int maxSize = 0
+
+        // TODO: check if startTags do not contain each other
 
         // Both tags have to be set or not set.
         if((domainStartTag != null && domainEndTag == null) || (domainStartTag == null && domainEndTag != null))
             throw new ParserInconsistentException("Domain start and end tag make no sense! Please make sure both are set or both are not set!")
+
+
+        // TODO: test a file where tags contain other tags, but still valid
+        for(int i = 0; i < entries.size(); i++)
+            for(int j = i + 1; i < entries.size(); j++)
+                if(entries[j].startTag.contains(entries[i].startTag))
+                    throw new ParserInconsistentException("Simpler Starttag appeared, which covers later tags!")
+
 
         // Compile all patterns for later
         entries.each{
@@ -72,9 +83,8 @@ class SimpleTagParser extends DynamicParser{
                 if(line.contains(domainEndTag) || line.contains(multilineEntry.endTag)){
                     if(line.contains(domainEndTag))
                         multilineConcat.append(line.subSequence(0, (int)line.indexOf(domainEndTag)))
-                    if(line.contains(multilineEntry.endTag))
+                    else if(line.contains(multilineEntry.endTag))
                         multilineConcat.append(((String)line).subSequence(0, (int)line.indexOf(multilineEntry.endTag)))
-
 
                     String multilineResult = multilineConcat.toString().replace("\t", "")
                     objectMap.put(multilineEntry.field, multilineResult)
@@ -82,9 +92,8 @@ class SimpleTagParser extends DynamicParser{
                 }
                 else{
                     multilineConcat.append(line)
+                    return
                 }
-
-                return
             }
 
 
@@ -99,9 +108,11 @@ class SimpleTagParser extends DynamicParser{
                     nestedLevel = -1
                 }
                 else if(nestedLevel >= nestedCounter)
-                    throw new ParserInconsistentException("Sorry, we are below the 'nestedlevel'. This should not be possible, we just found a bug. Please contact the developer.")
+                    throw new ParserInconsistentException("Sorry, we are below the 'nested level'. This should not be possible, we just found a bug. Please contact the developer.")
 
                 nestedCounter--
+
+                return
             }
 
             entries.each{ entry_it ->
@@ -157,6 +168,7 @@ class SimpleTagParser extends DynamicParser{
 
                         // We found a multilineTag, if the user specified correctly. Now read and concatenate until endtag reached.
                         multilineEntry = entry_it
+                        multilineConcat = new StringBuilder("")
                         multilineConcat.append(m_Multi.group(2))
                         return
                     }

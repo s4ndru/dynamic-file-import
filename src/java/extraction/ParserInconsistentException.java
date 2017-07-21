@@ -2,6 +2,7 @@ package extraction;
 
 /**
  * Created by s4ndru on 06/04/2016.
+ * Exception in case the parserdefinition contradicts itself.
  */
 public class ParserInconsistentException extends Exception{
 

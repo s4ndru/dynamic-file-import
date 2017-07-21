@@ -6,14 +6,24 @@ import grails.util.Holders
 import transformation.TransformationRoutine
 import transformation.TransformationService
 
+import java.nio.file.FileSystemException
+
 class FileParsingService {
 
-    static ArrayList<ArrayList<Map<String, Object>>> parseAllFilesInDirectory(File dir) throws ParserUnfitException, ParserInconsistentException {
+    static ArrayList<ArrayList<Map<String, Object>>> parseAllFilesInDirectory(File dir) throws ParserUnfitException, ParserInconsistentException, FileSystemException {
+
         ArrayList<ArrayList<Map<String, Object>>> parseResults = []
         //ArrayList....Files
         //ArrayList<ArrayList ... dataLines
         //ArrayList<ArrayList<Map ... one dataLine
         Integer parsedFilesCounter = 0
+        Integer fileCount = dir.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File f) {
+                return !f.isDirectory();
+            }
+        }).size();
+
         dir.eachFile (FileType.FILES) { file ->
             try {
                 DynamicParser parser = findCorrespondingParser(file)
@@ -22,16 +32,13 @@ class FileParsingService {
                     ArrayList<Map<String, Object>> result = parser.parse(file)
                     File finished_dir = new File((file.absolutePath - file.name) + "parsed files")
                     finished_dir.mkdir()
-                    boolean fileMoved = file.renameTo(new File(finished_dir, file.getName()))
-                    if(!fileMoved)
-                        // TODO exception
-                        println("exception!")
+                    if(!file.renameTo(new File(finished_dir, file.getName())))
+                        throw new FileSystemException("Could not move file '" + file.getName() + "'! Is another process accessing it?")
 
                     TransformationService.transformAndLoadData(result, parser)
                     parseResults.add(result)
                     parsedFilesCounter++
 
-                    // TODO move file into another folder
                 }
                 else {
                     println "Whoops, no parser found for file ${file.name}"
@@ -46,7 +53,7 @@ class FileParsingService {
             }
         }
 
-        println "${parsedFilesCounter} out of ${dir.listFiles().size()} files were parsed and transformed"
+        println "${parsedFilesCounter} out of ${fileCount} files were parsed and transformed"
 
         return parseResults
     }

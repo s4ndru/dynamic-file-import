@@ -12,6 +12,7 @@ abstract class DynamicParser {
     AllowedFiletype selectorFileType            // Filetype the parsing accepts
 
     SortedSet<TransformationRoutine> routines = new TreeSet<TransformationRoutine>()
+    SortedSet<TransformationRoutine> entries = new TreeSet<TransformationRoutine>()
 
     static hasMany = [entries: DynamicParserEntry, routines: TransformationRoutine]
 

@@ -2,6 +2,7 @@ package extraction;
 
 /**
  * Created by s4ndru on 23/03/2016.
+ * Exception in case the parser cannot parse a file the user defined for it.
  */
 
 public class ParserUnfitException extends Exception {
