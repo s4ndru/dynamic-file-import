@@ -25,17 +25,16 @@ class TokenSplitParser extends DynamicParser{
         file.eachLine{ line ->
             boolean skip = false
             for(String forbiddenLine in linesToIgnore){
-                // TODO: Optimize the "linesToIgnore"-proce ss
                 if(line.contains(forbiddenLine)){
                     // We found a line which the user told us to ignore => skip following procedure.
                     skip = true
-                    break;
+                    break
                 }
             }
 
             if(!skip) {
                 // Split line with the token.
-                // TODO: Maybe I should not trim all whitespaces beforehand?
+                // ...and trim whitespaces before and after
                 def splitLine = line.split("\\s*"+token+"\\s*")
 
                 // Helpermaps -----------------------------
@@ -58,7 +57,7 @@ class TokenSplitParser extends DynamicParser{
                                 // Is the entry parseable, if not => Did the user specify something wrong?
                                 // If optional, no problemo, but we might need to check the return value,
                                 // so we can figure out the right parsing
-                                def boolean isParseable
+                                boolean isParseable
                                 try {
                                     isParseable = (entry_it.checkType(entry))
                                 }
@@ -153,20 +152,5 @@ class TokenSplitParser extends DynamicParser{
 
     String toString() {
         "Tokenparser for " + name
-    }
-
-    static boolean checkIfStrictParsingNeeded(SortedSet<TransformationRoutine> routines, String line){
-        boolean is_needed = true
-
-        routines.each{ routine ->
-            routine.procedures.each {
-                it.notable_objects.each {
-                    if (line.contains(it.value)) {
-                        is_needed = false
-                    }
-                }
-            }
-        }
-        return is_needed
     }
 }

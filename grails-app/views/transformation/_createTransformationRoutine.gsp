@@ -10,10 +10,13 @@
     </div>
     <div class="form-group">
         <label for="target_object">Object:</label>
-        <g:select name="target_object" class="form-control" from="${params.domainList}" noSelection="[null : 'Please select a targetobject...']" required="required"/>
+        <g:select name="target_object" class="form-control" from="${params.domainList}" noSelection="[null : 'Please select a target object...']" required="required"/>
     </div>
     <div>
-        <g:remoteLink class="btn btn-warning" action="setRoutineProperties" controller="Transformation" update="routineContainer" params="{parser: \$('#belongs_to').val(), targetObject: \$('#target_object').val()}">Submit selected</g:remoteLink>
+        %{-- using attribute onmousedown because onclick gets replaced with the grails ajax server request --}%
+        %{-- onFailure was included just in case we do some serverside validation --}%
+        <g:remoteLink class="btn btn-warning" action="setRoutineProperties" controller="Transformation" update="routineContainer" onmousedown="return verifyForm()"
+                      onFailure="alert(XMLHttpRequest.responseText)" params="{parser: \$('#belongs_to').val(), targetObject: \$('#target_object').val()}">Submit selected</g:remoteLink>
     </div>
     <div id="routineContainer">
     </div>
@@ -24,10 +27,14 @@
     var updatePropertyCounter = 0;
 
     function verifyForm(){
-        alert("check");
 
         if($("#belongs_to").val() == "null"){
-            alert("Please select a parser.");
+            alert("Please select a parser to which the routine will belong to.");
+            return false;
+        }
+
+        if($("#target_object").val() == "null"){
+            alert("Please select a target object for the routine.");
             return false;
         }
 

@@ -4,7 +4,7 @@ class CreateColumnWidthParserTagLib {
 
     static namespace="dfi"
 
-    def CreateColumnWidthParser = {
+    def createColumnWidthParser = {
         out << g.render(template: "/extraction/createColumnWidthParser")
     }
 }

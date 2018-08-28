@@ -4,7 +4,7 @@ package extraction
  * Created by s4ndru on 04/04/2016.
  */
 enum AllowedFiletype {
-    TXT(".txt"), CSV(".csv"), JSON(".json"), XML(".xml")
+    TXT(".txt"), CSV(".csv"), JSON(".json"), XML(".xml"), PRN(".prn")
 
     String propertyName
 

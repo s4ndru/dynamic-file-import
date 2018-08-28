@@ -3,6 +3,7 @@ package extraction
 import groovy.io.FileType
 import testing.*
 import grails.util.Holders
+import transformation.ConstraintException
 import transformation.TransformationRoutine
 import transformation.TransformationService
 
@@ -10,19 +11,21 @@ import java.nio.file.FileSystemException
 
 class FileParsingService {
 
-    static ArrayList<ArrayList<Map<String, Object>>> parseAllFilesInDirectory(File dir) throws ParserUnfitException, ParserInconsistentException, FileSystemException {
+    static ArrayList<ArrayList<Map<String, Object>>> parseAllFilesInDirectory(File dir) throws ParserUnfitException, ParserInconsistentException, FileSystemException, ConstraintException {
 
         ArrayList<ArrayList<Map<String, Object>>> parseResults = []
         //ArrayList....Files
         //ArrayList<ArrayList ... dataLines
         //ArrayList<ArrayList<Map ... one dataLine
         Integer parsedFilesCounter = 0
+
+        // Count all files, but not directories
         Integer fileCount = dir.listFiles(new FileFilter() {
             @Override
-            public boolean accept(File f) {
-                return !f.isDirectory();
+            boolean accept(File f) {
+                return !f.isDirectory()
             }
-        }).size();
+        }).size()
 
         dir.eachFile (FileType.FILES) { file ->
             try {
@@ -33,7 +36,7 @@ class FileParsingService {
                     File finished_dir = new File((file.absolutePath - file.name) + "parsed files")
                     finished_dir.mkdir()
                     if(!file.renameTo(new File(finished_dir, file.getName())))
-                        throw new FileSystemException("Could not move file '" + file.getName() + "'! Is another process accessing it?")
+                        throw new FileSystemException("Could not move file '" + file.getName() + "'! Is another process accessing it? Is a file with the same name already in the parsed files folder?")
 
                     TransformationService.transformAndLoadData(result, parser)
                     parseResults.add(result)
@@ -46,10 +49,16 @@ class FileParsingService {
                 }
             }
             catch(ParserUnfitException e) {
-                throw e
+                e.printStackTrace()
             }
             catch(ParserInconsistentException e) {
-                throw e
+                e.printStackTrace()
+            }
+            catch(ConstraintException e) {
+                e.printStackTrace()
+            }
+            catch(Exception e) {
+                e.printStackTrace()
             }
         }
 
@@ -67,7 +76,7 @@ class FileParsingService {
                 if(parser == null)
                     parser = it
                 else
-                    throw new ParserInconsistentException("Multiple Parsers found for a File. Which one to use?")
+                    throw new ParserInconsistentException("Multiple Parsers found for a file. Which one to use?")
         }
 
         return parser

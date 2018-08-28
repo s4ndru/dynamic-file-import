@@ -8,12 +8,13 @@ class DynamicFileImportGrailsPlugin {
         "grails-app/views/error.gsp"
     ]
 
-    // TODO Fill in these fields
-    def title = "Dynamic File Import Plugin" // Headline display name of the plugin
+    def title = "Dynamic file import plugin" // Headline display name of the plugin
     def author = "David Sandru"
     def authorEmail = "sandru@student.tugraz.at"
     def description = '''\
-Brief summary/description of the plugin.
+A plugin which makes it possible to define a parser for simple xml, tabular files like csv, files which have a fixed length per column and files which use tags like json and more. 
+Further, the user can specify transformation-methods which are then applied on the parsed dataset.
+Lastly, the datasets will be loaded into the database.
 '''
 
     // URL to the plugin's documentation

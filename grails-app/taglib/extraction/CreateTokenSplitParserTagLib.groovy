@@ -4,7 +4,7 @@ class CreateTokenSplitParserTagLib {
 
     static namespace="dfi"
 
-    def CreateTokenSplitParser = {
+    def createTokenSplitParser = {
         out << g.render(template: "/extraction/createTokenSplitParser")
     }
 }

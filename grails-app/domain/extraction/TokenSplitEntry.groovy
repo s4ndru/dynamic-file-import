@@ -13,4 +13,9 @@ class TokenSplitEntry extends DynamicParserEntry{
     static constraints = {
         splitIndizes(nullable: false)
     }
+
+    @Override
+    int compareTo(obj){
+        id.compareTo(obj.id)
+    }
 }

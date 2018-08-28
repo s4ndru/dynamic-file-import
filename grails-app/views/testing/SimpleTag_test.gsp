@@ -1,11 +1,11 @@
 <%--
   Created by IntelliJ IDEA.
-  User: s4ndru
-  Date: 28/03/2016
-  Time: 18:15
+  User: Sandr
+  Date: 03.03.2017
+  Time: 12:25
 --%>
 
-<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <html>
     <head>
         <title>create TSP</title>
@@ -15,7 +15,7 @@
     </head>
     <body style="background-color: #3c3c3c">
         <div class="col-lg-3 center-block">
-            <dfi:createTokenSplitParser />
+            <dfi:createSimpleTagParser />
         </div>
     </body>
 </html>

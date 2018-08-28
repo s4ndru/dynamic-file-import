@@ -1,11 +1,12 @@
 package extraction
 
 // The FileEntryParser represents an Entry in a File, for the FileParser
+// Comparable, so it is possible to parse more complex tags first, then simpler one later. E.g. "Timestamp:" & "Time"
+// TODO: Test all UIs because of that.
 abstract class DynamicParserEntry implements Comparable{
 
     String field
     boolean optional = false
-    boolean trim = false // TODO remove this. Should be in transformation methods
     EntryDatatype dataType
 
     static constraints = {
@@ -95,9 +96,5 @@ abstract class DynamicParserEntry implements Comparable{
 
     static mapping = {
         sort id: "asc"
-    }
-
-    int compareTo(obj) {
-        id.compareTo((obj as DynamicParserEntry).id)
     }
 }

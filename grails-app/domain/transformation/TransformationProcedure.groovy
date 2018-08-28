@@ -25,7 +25,7 @@ class TransformationProcedure implements Comparable{
     }
 
     int compareTo(obj) {
-        // TODO => test with same orders
+        // TODO => test with duplicate orders
         order_id.compareTo((obj as TransformationProcedure).order_id)
     }
 }

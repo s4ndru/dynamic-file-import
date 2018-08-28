@@ -1,11 +1,11 @@
 <div class="checkbox">
     <label for="to_update">
-        <g:checkBox name="to_update" value="true"/> Update existing
+        <g:checkBox name="to_update"/> Update existing
     </label>
 </div>
 
 <div class="form-group">
-    <g:field name="order_id" class="form-control" type="number" required="required" min="0" placeholder="Sequence number"/>
+    <g:field name="order_id" class="form-control" type="number" required="required" min="0"  placeholder="Sequence number"/>
 </div>
 
 <div>
@@ -47,5 +47,16 @@
 
         %{--$('#update_properties').append(div);--}%
     %{--});--}%
+
+    %{--var orderIDs = [<g:each in="${params.orderIDs}" var="orderID" status="i">${orderID} <g:if test="i < ${params.orderIDs.size() - 1}">,</g:if> </g:each>]--}%
+
+    %{--function validateOrderID(value){--}%
+        %{--if(orderIDs.contains(value)){--}%
+            %{--alert("Order id " + value + " is already taken! Taken order ids are: " + orderIDs);--}%
+            %{--return false;--}%
+        %{--}--}%
+
+        %{--return true;--}%
+    %{--}--}%
 
 </g:javascript>

@@ -1,4 +1,5 @@
-<g:form class="well" controller="extraction" action="createTokenSplitParser" params="[targetUri: (request.forwardURI - request.contextPath)]">
+%{--<g:form class="well" controller="extraction" action="createTokenSplitParser" params="[targetUri: (request.forwardURI - request.contextPath)]">--}%
+<g:form class="well">
     <div id="parser">
         <div class="form-group">
             <g:render template="/extraction/parser"/>
@@ -20,7 +21,9 @@
         %{--<g:render template="/transformation/selectRoutines"/>--}%
     %{--</div>--}%
 
-    <g:actionSubmit class="btn btn-primary pull-right" name="submitTokenSplitParser" id="submitTokenSplitParser" value="save parser" action="createTokenSplitParser" onclick="return verifyForm()"/>
+    <g:submitToRemote class="btn btn-primary pull-right" name="submitTokenSplitParser" value="save parser"
+                      action="createTokenSplitParser" onclick="return verifyForm()" onFailure="alert(XMLHttpRequest.responseText)"
+                      onSuccess="alert('Parser was successfully saved!'); location.reload();"/>
     <div style="clear: both;"></div>
 </g:form>
 
@@ -35,10 +38,10 @@
 
     function appendSplitTokenEntry(index){
         $("#entry" + index).append('<div class="checkbox"><label for="multiple' + index + '" style="margin-right: 5px;"><g:checkBox name="multiple' + index + '" /> Multiple</label></div>');
-        $("#entry" + index).append('<input class="form-control" name="splitIndizes' + index + '" placeholder="Indizes (comma seperated)" value="" id="splitIndizes' + index + '" type="text"> ');
+        $("#entry" + index).append('<input class="form-control" name="splitIndizes' + index + '" placeholder="Field-indizes" value="" id="splitIndizes' + index + '" type="text"> ');
 
         if(index == 0)
-            $("#entry0").append('<label>(Starts from 0, eg. "0", "8", "1,2,3" )</label>');
+            $("#entry0").append('<label>(Starts from 1, eg. "1", "8", "1,2,3" )</label>');
         $("#entry" + index).append('<hr>');
     }
 
@@ -51,17 +54,17 @@
 
     function verifyForm(){
 
-        if($("#name").val() == ""){
+        if($("#name").val() === ""){
             alert("Please fill out the 'Parsername'-field.");
             return false;
         }
 
-        if($("#selectorName").val() == ""){
+        if($("#selectorName").val() === ""){
             alert("Please fill out the 'Filename substring'-field.");
             return false;
         }
 
-        if($("#token").val() == ""){
+        if($("#token").val() === ""){
             alert("Please fill out the 'Separation token'-field.");
             return false;
         }
@@ -78,18 +81,18 @@
         }*/
 
         for(i = 0; i <= entryCounter; i++){
-            if($("#field" + i).val() == ""){
+            if($("#field" + i).val() === ""){
                 alert("Please fill out all 'property'-fields.");
                 return false;
             }
 
-            if($("#splitIndizes" + i).val() == ""){
+            /*if($("#splitIndizes" + i).val() == ""){
                 alert("Please fill out all 'Indizes (comma seperated)'-fields.");
                 return false;
-            }
+            }*/
 
             if($("#multiple" + i).prop("checked") && $("#splitIndizes" + i).val().split(",").length <= 1){
-                alert("'Multiple' cannot be checked with only one or less split index, please review.");
+                alert("'Multiple' cannot be checked with only one or less split indizes, please review.");
                 return false;
             }
 

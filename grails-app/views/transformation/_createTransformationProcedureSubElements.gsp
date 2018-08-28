@@ -34,7 +34,7 @@
                             <g:select name="parameter_key${i}_0" id="parameter_key${i}_0" from="${params.objectFields}" style="width: 48%"
                                       noSelection="[null : 'Please select a entry..']" placeholder="parameterkey" />
                         </g:if>
-                        <g:elseif test="${MethodInfo.isDatum((String)params.method, i) &&
+                        <g:elseif test="${MethodInfo.isDataWrapper((String)params.method, i) &&
                                 (MethodInfo.getDatumSetPosition((String)params.method) == null ? true : MethodInfo.getDatumSetPosition((String)params.method).contains(0))}">
                             <g:select name="parameter_key${i}_0" id="parameter_key${i}_0" from="${params.entries}" style="width: 48%"
                                       noSelection="[null : 'Please select a datum...']" placeholder="parameterkey" />
@@ -43,7 +43,7 @@
                             <g:textField name="parameter_key${i}_0" id="parameter_key${i}_0" placeholder="parameterkey" style="width: 48%" />
                         </g:else>
 
-                        <g:if test="${MethodInfo.isDatum((String)params.method, i) &&
+                        <g:if test="${MethodInfo.isDataWrapper((String)params.method, i) &&
                                 (MethodInfo.getDatumSetPosition((String)params.method) == null ? false : MethodInfo.getDatumSetPosition((String)params.method).contains(1))}">
                             <g:select name="parameter_value${i}_0" id="parameter_value${i}_0" from="${params.entries}" style="width: 48%"
                                       noSelection="[null : 'Please select a datum...']" placeholder="parametervalue" />
@@ -57,13 +57,13 @@
                 <g:if test="${MethodInfo.isRepeatable((String)params.method, i)}">
                     <button type="button" id="addParamBtn${i}" onclick="addParameterToWrapper(${i});">add parameterpair</button>
                 </g:if>
-                <hr>
+                <hr/>
             </g:each>
         </div>
     </label>
 </div>
 
-<g:submitToRemote class="btn btn-primary pull-right" name="submitTransformationProcedure" id="submitTransformationProcedure" value="save TransformationProcedure"
+<g:submitToRemote class="btn btn-primary pull-right" name="submitTransformationProcedure" value="save TransformationProcedure"
                   action="createTransformationProcedure" onclick="return verifyForm()" onFailure="alert(XMLHttpRequest.responseText)"
                   onSuccess="alert('Routine was successfully saved!'); location.reload();"/>
 
@@ -80,12 +80,6 @@
         new_element.children("#object_key0").attr("name", "object_key" + notable_object_counter);
         new_element.children("#object_value0").attr("name", "object_value" + notable_object_counter);
 
-        new_element.children("#object_key0").val("null");
-        new_element.children("#object_value0").val("");
-
-        new_element.children("#object_key0").attr("id", "object_key" + notable_object_counter);
-        new_element.children("#object_value0").attr("id", "object_value" + notable_object_counter);
-
         $("#notable_objects").append(new_element);
     }
 
@@ -97,76 +91,22 @@
 
     function addParameterToWrapper(wrapperIndex){
         wrapper_index_array[wrapperIndex]++;
-
-        var new_element = $('#parameter_property' + wrapperIndex+ "_0").clone(true);
         debugger;
+
+        var new_element = $('#parameter_property' + wrapperIndex + "_0").clone(true);
+
         new_element.attr("id", "parameter_property" + wrapperIndex + "_" + wrapper_index_array[wrapperIndex]);
+        new_element.attr("name", "parameter_property" + wrapperIndex + "_" + wrapper_index_array[wrapperIndex]);
 
-        new_element.children("#parameter_key" + wrapperIndex + "_" + wrapper_index_array[wrapperIndex]).attr("name", "parameter_key" + wrapperIndex+ "_" + wrapper_index_array[wrapperIndex]);
-        new_element.children("#parameter_value" + wrapperIndex + "_" + wrapper_index_array[wrapperIndex]).attr("name", "parameter_value" + wrapperIndex+ "_" + wrapper_index_array[wrapperIndex]);
+        new_element.children("#parameter_key" + wrapperIndex + "_0").attr("name", "parameter_key" + wrapperIndex+ "_" + wrapper_index_array[wrapperIndex]);
+        new_element.children("#parameter_value" + wrapperIndex + "_0").attr("name", "parameter_value" + wrapperIndex+ "_" + wrapper_index_array[wrapperIndex]);
 
-        new_element.children("#parameter_key" + wrapperIndex + "_" + wrapper_index_array[wrapperIndex]).val("");
-        new_element.children("#parameter_value" + wrapperIndex + "_" + wrapper_index_array[wrapperIndex]).val("");
+        new_element.children("#parameter_key" + wrapperIndex + "_0").val("null");
+        new_element.children("#parameter_value" + wrapperIndex + "_0").val("");
 
-        new_element.children("#parameter_key" + wrapperIndex + "_" + wrapper_index_array[wrapperIndex]).attr("id", "parameter_key" + wrapperIndex+ "_" + wrapper_index_array[wrapperIndex]);
-        new_element.children("#parameter_value" + wrapperIndex + "_" + wrapper_index_array[wrapperIndex]).attr("id", "parameter_value" + wrapperIndex+ "_" + wrapper_index_array[wrapperIndex]);
+        new_element.children("#parameter_key" + wrapperIndex + "_0").attr("id", "parameter_key" + wrapperIndex+ "_" + wrapper_index_array[wrapperIndex]);
+        new_element.children("#parameter_value" + wrapperIndex + "_0").attr("id", "parameter_value" + wrapperIndex+ "_" + wrapper_index_array[wrapperIndex]);
 
         $("#parameter_properties" + wrapperIndex).append(new_element);
     }
-
-    /*var notable_object_index = 0;
-     $('#notable_objects_container').on('click', '#addObjectBtn', function (){
-     notable_object_index++;
-
-     var div = document.createElement('div');
-     div.id = 'parameter_property' + notable_object_index;
-     div.innerHTML = '<input name="object_key' + notable_object_index + '" placeholder="objectkey" id="object_key' + notable_object_index + '" type="text" required="required"> ' +
-     '<input name="object_value' + notable_object_index + '" placeholder="objectvalue" id="object_value' + notable_object_index + '" type="text" required="required">';
-
-     $('#notable_objects').append(div);
-     });
-
-     var wrapper_index = 0;
-     var param_index = 0;
-
-     //TODO finish
-     $('#parameter_container_container').on('click', '#addWrapperBtn', function(){
-     wrapper_index++
-
-     var div = document.createElement('div');
-     div.id = 'notable_object' + wrapper_index;
-     div.innerHTML = '<div id="parameter_properties' + wrapper_index + '">' +
-     '<div id="parameter_property' + wrapper_index + '|0">' +
-     '<input name="parameter_key' + param_index + '" placeholder="parameterkey" id="parameter_key' + wrapper_index + '|0" type="text" required="required"> ' +
-     '<input name="parameter_value' + param_index + '" placeholder="parametervalue" id="parameter_value' + wrapper_index + '|0" type="text" required="required">' +
-     '</div>' +
-     '</div>' +
-     '<button type="button" id="addParamBtn' + wrapper_index + '" >add parameterpair</button>' +
-     '<hr>';
-
-     $('#parameter_container').append(div);
-
-     $('#parameter_container').on('click', '#addParamBtn' + wrapper_index, function(){
-     param_index++;
-
-     var div = document.createElement('div');
-     div.id = 'parameter_property' + param_index;
-     div.innerHTML = '<input name="parameter_key' + param_index + '" placeholder="parameterkey" id="parameter_key' + param_index + '|' + wrapper_index +  '" type="text" required="required"> ' +
-     '<input name="parameter_value' + param_index + '" placeholder="parametervalue" id="parameter_value' + param_index + '" type="text" required="required">';
-
-     $('#parameter_properties' + wrapper_index).append(div);
-     });
-     });
-
-     $('#parameter_container').on('click', '#addParamBtn0', function(){
-     param_index++;
-
-     var div = document.createElement('div');
-     div.id = 'parameter_property' + param_index;
-     div.innerHTML = '<input name="parameter_key' + param_index + '" placeholder="parameterkey" id="parameter_key' + param_index + '|' + wrapper_index +  '" type="text" required="required"> ' +
-     '<input name="parameter_value' + param_index + '" placeholder="parametervalue" id="parameter_value' + param_index + '" type="text" required="required">';
-
-     $('#parameter_properties0').append(div);
-     });*/
-
 </g:javascript>

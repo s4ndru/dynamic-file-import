@@ -12,8 +12,8 @@
     <resource>extraction.ColumnWidthParser</resource>
     <resource>extraction.DynamicParser</resource>
     <resource>extraction.DynamicParserEntry</resource>
-    <resource>extraction.TagSelectEntry</resource>
-    <resource>extraction.TagSelectParser</resource>
+    <resource>extraction.SimpleTagEntry</resource>
+    <resource>extraction.SimpleTagParser</resource>
     <resource>extraction.TokenSplitEntry</resource>
     <resource>extraction.TokenSplitParser</resource>
     <resource>testing.ColumnWidthTest</resource>
