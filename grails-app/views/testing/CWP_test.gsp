@@ -18,4 +18,5 @@
             <dfi:createColumnWidthParser />
         </div>
     </body>
+    <g:javascript src="setBootstrapClasses.js"/>
 </html>

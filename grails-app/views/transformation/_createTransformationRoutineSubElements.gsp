@@ -1,33 +1,33 @@
-<div class="checkbox">
+<div>
     <label for="to_update">
         <g:checkBox name="to_update"/> Update existing
     </label>
 </div>
 
-<div class="form-group">
-    <g:field name="order_id" class="form-control" type="number" required="required" min="0"  placeholder="Sequence number"/>
+<div>
+    <g:field name="order_id" type="number" required="required" min="0"  placeholder="Sequence number"/>
 </div>
 
 <div>
     <label for="property_container">
         Properties of object to update:
         <div id="property_container">
-            <div id="update_properties" class="form-group">
+            <div id="update_properties">
                 <g:render template="transformationRoutineProperties" params="${params}" />
             </div>
-            <g:submitToRemote class="btn btn-warning" style="margin: 5px 0 5px 0" id="addPropertyBtn" type="button" url="[action: 'addPropertyPair']" update="update_properties" value="add propertypair"/>
+            <g:submitToRemote id="addPropertyBtn" type="button" url="[action: 'addPropertyPair']" update="update_properties" value="add propertypair"/>
             %{--<button type="button" id="addPropertyBtn" >add propertypair</button>--}%
         </div>
     </label>
 </div>
 
-<g:submitToRemote class="btn btn-primary pull-right" name="submitTransformationRoutine" id="submitTransformationRoutine" value="save TransformationRoutine"
+<g:submitToRemote name="submitTransformationRoutine" id="submitTransformationRoutine" value="save TransformationRoutine"
                   action="createTransformationRoutine" onclick="return verifyForm()" onFailure="alert(XMLHttpRequest.responseText)"
                   onSuccess="alert('Routine was successfully saved!'); location.reload();"/>
 <div style="clear: both;"></div>
 
 
-<g:javascript>
+%{--<g:javascript>--}%
 
     %{--$('#property_container').on('click', '#addPropertyBtn', function(){--}%
         %{--updatePropertyCounter++--}%
@@ -59,4 +59,4 @@
         %{--return true;--}%
     %{--}--}%
 
-</g:javascript>
+%{--</g:javascript>--}%

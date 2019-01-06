@@ -3,12 +3,12 @@ package extraction
 /**
  * Created by s4ndru on 04/04/2016.
  */
-enum AllowedFiletype {
-    TXT(".txt"), CSV(".csv"), JSON(".json"), XML(".xml"), PRN(".prn")
+enum AllowedFileType {
+    TXT(".txt"), CSV(".csv"), JSON(".json"), XML(".xml"), PRN(".prn"), YAML(".yaml")
 
     String propertyName
 
-    AllowedFiletype(String propertyName) {
+    AllowedFileType(String propertyName) {
         this.propertyName = propertyName
     }
 
@@ -16,9 +16,9 @@ enum AllowedFiletype {
         return propertyName
     }
 
-    static AllowedFiletype fromString(String text) {
+    static AllowedFileType fromString(String text) {
         if (text != null) {
-            for (AllowedFiletype type : values()) {
+            for (AllowedFileType type : values()) {
                 if (text.equalsIgnoreCase(type.propertyName)) {
                     return type
                 }

@@ -1,23 +1,36 @@
 package transformation
 
 import extraction.*
+
 import grails.util.Holders
 import org.codehaus.groovy.runtime.MethodClosure
+
+import java.sql.Timestamp
+import java.util.regex.Matcher
 
 class TransformationService {
 
     // Internally used methods /////////////////////////////////////////////////////////////////////////////////////////
 
-    static def transformAndLoadData(ArrayList<Map<String,Object>> data, DynamicParser parser){
+    static def transformAndLoadData(ArrayList<Map<String,Object>> data, DynamicParser parser) throws Exception{
         ArrayList<Object> temp
 
         parser.routines.each { routine ->
             ArrayList<Object> objects = new ArrayList<Object>()
+
             data.each { objects.add(null) }
 
             for (int procedure_index = 0; procedure_index < routine.getProcedures().size(); procedure_index++) {
-                TransformationProcedure procedure = routine.getProcedures().asList()[procedure_index]
+                List<TransformationProcedure> procedures = routine.getProcedures().asList()
+                TransformationProcedure procedure
+
+                if(procedures.temporary.contains(true))
+                    procedure = procedures[procedures.temporary.indexOf(true)]
+                else
+                    procedure = procedures[procedure_index]
+
                 data.eachWithIndex { parse_object, object_index ->
+
                     boolean is_notable_line = false
                     procedure.notable_objects.each {
                         if (parse_object[it.key] == parseToCorrespondingType(parse_object[it.key], it.value)) {
@@ -27,28 +40,29 @@ class TransformationService {
 
                     if ((procedure.is_repetitive && !is_notable_line) || (!procedure.is_repetitive && is_notable_line)) {
                         Class target_class = getClassFromString(routine.target_object)
+                        StringBuilder propertiesErrorString = new StringBuilder()
+
                         if (routine.to_update) {
-
-                            List found_objects = target_class.where {
+                            List found_objects = target_class.findAll {
                                 routine.update_properties.each {
-                                    eq it.key, parse_object[it.value]
+                                    propertiesErrorString.append(" " + it.value + "->" + parse_object[it.key] + ";")
+                                    eq it.value, parse_object[it.key]
                                 }
-                            }.list()
+                            }
 
-                            if (found_objects.size() > 1)
-                                throw new ValidationException("No")
+                            if (found_objects.size() > 1) {
+                                StringBuilder updateCriteriaErrorString = new StringBuilder()
+                                updateCriteriaErrorString.append("Problematic object is of type '${target_class.name}' with its compared properties being values:${propertiesErrorString.toString()}")
 
-                            // TODO check what happens if null
+                                throw new ValidationException("Found multiple objects in database which apply for the 'update' criteria! " +
+                                        "Update criteria (or a combination of it) must be unique to each object! " + updateCriteriaErrorString.toString())
+                            }
+
                             objects[object_index] = found_objects[0]
 
-                            //objects[object_index] = target_class.find(update_instance_criteria)
-
-                            if (objects[object_index] == null)
-                                objects[object_index] = target_class.newInstance()
-                        } else {
-                            if (objects[object_index] == null)
-                                objects[object_index] = target_class.newInstance()
                         }
+                        if (objects[object_index] == null)
+                            objects[object_index] = target_class.newInstance()
 
                         temp = procedure.transformation_method(procedure, parse_object, objects[object_index])
                         parse_object = temp[0]
@@ -58,7 +72,6 @@ class TransformationService {
                     }
                 }
 
-                // TODO: test more files with same parser/routine/procedure because of the procedure of later removing temporary procedures from the list again
                 if (procedure.temporary) {
                     // Delete all wraps (and with them, their params) which are not used in other procedures.
                     def wrapsToDelete = new ArrayList<ParamEntryWrapper>()
@@ -67,20 +80,20 @@ class TransformationService {
                             def paramsToDelete = new ArrayList<ParamEntry>()
                             wrap.parameters.each { paramsToDelete.add(it) }
                             wrap.parameters.clear()
-                            paramsToDelete.each { it.delete() }
+                            paramsToDelete.each { it.delete(flush: true) }
                             wrapsToDelete.add(wrap)
                         }
                     }
 
                     wrapsToDelete.each { wrap ->
                         procedure.parameterWrappers.remove(wrap)
-                        wrap.delete()
+                        wrap.delete(flush: true)
                     }
 
                     routine.procedures.remove(procedure)
+                    routine.save(flush: true)
 
-                    procedure.delete()
-                    // TODO: philosophize about this. Could this be a problem?
+                    procedure.delete(flush: true)
                     procedure_index--
                 }
             }
@@ -106,65 +119,120 @@ class TransformationService {
                 return Float.parseFloat(fieldToParse)
             }
             catch(Exception e){
-                throw new IncorrectSpecificationException("A specified entry is not the same type as it's corresponding field in the parsedentrymap")
+                throw new IncorrectSpecificationException("Specified entry cannot be parsed to the data type of the object it is assigned to.")
             }
         else if(obj instanceof Integer)
             try{
                 return Integer.parseInt(fieldToParse)
             }
-            catch(Exception e)
-            {
-                throw new IncorrectSpecificationException("A specified entry is not the same type as it's corresponding field in the parsedentrymap")
+            catch(Exception e){
+                throw new IncorrectSpecificationException("Specified entry cannot be parsed to the data type of the object it is assigned to.")
+            }
+        else if(obj instanceof Long)
+            try{
+                return Long.parseLong(fieldToParse)
+            }
+            catch(Exception e){
+                throw new IncorrectSpecificationException("Specified entry cannot be parsed to the data type of the object it is assigned to.")
+            }
+        else if(obj instanceof Boolean)
+            try{
+                return Boolean.parseBoolean(fieldToParse)
+            }
+            catch(Exception e){
+                throw new IncorrectSpecificationException("Specified entry cannot be parsed to the data type of the object it is assigned to.")
+            }
+        else if(obj instanceof String)
+            try{
+                return fieldToParse.toString()
+            }
+            catch(Exception e){
+                throw new IncorrectSpecificationException("Specified entry cannot be parsed to the data type of the object it is assigned to.")
             }
         else
             return fieldToParse
+    }
+
+    // This helper function checks if there are as many wrappers defined as the function needs and if the wrappers
+    // have at least one parameter entry or even multiple if the entry is repeatable as specified by the function
+    static def checkIfParamsSetCorrectly(String methodName, TransformationProcedure procedure) throws IncorrectSpecificationException{
+        // Check if a method has a correct number of wrappers set
+        if(methodName != "cacheInfoForCrossProcedure" && procedure.parameterWrappers.size() != MethodInfo.getWrapperCount(methodName))
+            throw new IncorrectSpecificationException("Found ${procedure.parameterWrappers.size()} instead of " +
+                    "${MethodInfo.getWrapperCount(methodName)} parameter-wrappers in method: '${methodName}'")
+
+
+        ArrayList<ParamEntryWrapper> wrappers = procedure.parameterWrappers.asList()
+        for(int i = 0; i < procedure.parameterWrappers.size(); i++) {
+            // Check if a method has at least one parametertuple per wrapper and not more than one if it is not a repeatable parameter tuple
+            if (!MethodInfo.isRepeatable(methodName, i) && wrappers[i].parameters.size() > 1) {
+                throw new IncorrectSpecificationException("Found a parameterlist of size bigger than 1 in wrapper #${i} " +
+                        "of method: '${methodName}' in '${TransformationRoutine.find{procedures{id == 1}}}'" +
+                        ", even though it is a non-repeatable parameter type!")
+            }
+            else if(wrappers[i].parameters.size() == 0) {
+                throw new IncorrectSpecificationException("Found a parameter-list of size 0 in wrapper #${i} of method: '${methodName}' " +
+                        "in '${TransformationRoutine.find{procedures{id == 1}}}'")
+            }
+
+            // Second parameter specified class is always in the first wrapper and on the right side
+            if(MethodInfo.getSecondClassPropertiesPosition(methodName) != null && i == 0
+               && (wrappers[i].parameters.first().right_value == "null" || wrappers[i].parameters.first().right_value == ""
+               || wrappers[i].parameters.first().right_value == null))
+                throw new IncorrectSpecificationException("Found an empty classname the right value of wrapper #0 of method: '${methodName}' " +
+                        "in '${TransformationRoutine.find{procedures{id == 1}}}'")
+
+        }
     }
 
 
     // Transformation methods //////////////////////////////////////////////////////////////////////////////////////////
 
     //// Simple Transformation methods /////////////////////////////////////////////////////////////////////////////////
-    // TODO check everywhere if enough SortedSets and params are specified
-    // TODO check if targetobject/class hast a list and perform operation for every object in list (arrays) for every transformation method
-    // TODO implement array-transformation stuff
-    // TODO implement parsing from string to integer etc.
-    // TODO implement transformationmethod to remove fields "when" something applies
-    // TODO implement a parsing method (e.g. string to integer, if possible, else stay string. etc.)
-    // TODO implement a replace specified emtpy field with...
-    // TODO test (all transformation-methods)
 
-    // Params:  1. Set: [propertyname in datum : value to append] => repeat X times
-    static def appendString(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance){
-        def parameters = procedure.parameterWrappers.first().parameters.first()
-        parameters.each{ parameter ->
-            datum[parameter.left_value] = parameter.right_value + datum[parameter.left_value]
-        }
-        return [datum, null]
-    }
+    // Params:  1. Set: [fieldname in parser created datum : value to append] => repeat X times
+    static def appendStrings(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance){
+        checkIfParamsSetCorrectly("appendString", procedure)
 
-    // Params:  1. Set: [propertyname in datum : value to append] => repeat X times
-    static def prependString(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance){
         def parameters = procedure.parameterWrappers.first().parameters.first()
         parameters.each{ parameter ->
             datum[parameter.left_value] = datum[parameter.left_value] + parameter.right_value
         }
+
         return [datum, null]
     }
 
-    // Params:  1. Set: [propertyname in datum : propertyname in datum] => repeat X times
-    static def trimField(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance){
+    // Params:  1. Set: [value to prepend : fieldname parser created in datum] => repeat X times
+    static def prependStrings(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance){
+        checkIfParamsSetCorrectly("prependString", procedure)
+
         def parameters = procedure.parameterWrappers.first().parameters.first()
         parameters.each{ parameter ->
-            datum[parameter.left_value] = datum[parameter.left_value].trim()
-            datum[parameter.right_value] = datum[parameter.right_value].trim()
+            datum[parameter.left_value] = parameter.left_value + datum[parameter.right_value]
         }
         return [datum, null]
     }
 
-    // Params:  1. Set: [propertyname in datum (where to fetch the line to split) : token to split]
-    //          2. Set: [propertyname in datum (where the result gets saved) : splitindex] => repeat X times
+    // Params:  1. Set: [fieldname in datum : fieldname in datum] => repeat X times
+    static def trimField(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance){
+        checkIfParamsSetCorrectly("trimField", procedure)
+
+        def parameters = procedure.parameterWrappers.first().parameters.first()
+        parameters.each{ parameter ->
+            datum[parameter.left_value] = datum[parameter.left_value].toString().trim()
+            datum[parameter.right_value] = datum[parameter.right_value].toString().trim()
+        }
+        return [datum, null]
+    }
+
+
+    // TODO Doc note => recommended to use this for array fields in simplePagParser
+    // Params:  1. Set: [fieldname in parser created datum (where data is fetched) : token to split]
+    //          2. Set: [fieldname in datum (where result will be saved) : splitindex] => repeat X times
     // Note: if a splitindex is specified but cannot be found in the splitstring-result it is treated as "optional"
     static def splitStringField(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
+        checkIfParamsSetCorrectly("splitStringField", procedure)
+
         def param = procedure.parameterWrappers.first().parameters.asList().first()
         def mapping = procedure.parameterWrappers.asList()[1].parameters.asList()
         def line_to_split = datum[param.left_value]
@@ -173,28 +241,53 @@ class TransformationService {
         mapping.each{
             if(datum.get(it.left_value) == null)
                 datum.put(it.left_value, "")
-            // TODO: throw exception if index not parseable to Int
-            datum[it.left_value] = split_lines[Integer.parseInt(it.right_value)]
+
+            def index = Integer.parseInt(it.right_value)
+
+            if(index < split_lines.size())
+                datum[it.left_value] = split_lines[index]
         }
 
         return [datum, null]
     }
 
-    // Params:  1. Set: [propertyname in datum (where the result gets saved) : substring to put between each append (optional)]
-    //          2. Set: [propertyname in datum (data to aggregate): propertyname in datum (data to aggregate)] => repeat X times
-    static def appendFields(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
-        // TODO
+    // Params:  1. Set: [fieldname in datum (where the result will be saved) : substring to put between each append (optional)]
+    //          2. Set: [fieldname in datum (where data is fetched) : fieldname in datum (where data is fetched)] => repeat X times
+    static def concatenateFields(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
+        checkIfParamsSetCorrectly("concatenateFields", procedure)
+
+        String fieldname = procedure.parameterWrappers.first().parameters.asList().first().left_value
+        String mid_string = procedure.parameterWrappers.first().parameters.asList().first().right_value
+        def fields_to_append = procedure.parameterWrappers.asList()[1].parameters.asList()
+
+        StringBuilder result = new StringBuilder("")
+        fields_to_append.eachWithIndex{it, index ->
+            if(it.left_value != null && it.left_value != "" && it.left_value != "null")
+                result.append(datum[it.left_value])
+            if(it.right_value != null && it.right_value != "" && it.right_value != "null")
+                result.append(mid_string + datum[it.right_value])
+
+            if(index < fields_to_append.size() - 1)
+                result.append(mid_string)
+        }
+
+        if(datum.get(fieldname) == null)
+            datum.put(fieldname, "")
+        datum[fieldname] = result.toString()
+
         return [datum, null]
     }
 
-    // Params:  1. Set: [propertyname in datum (where the result gets saved) : multiplier for each value]
-    //          2. Set: [propertyname in datum (data to aggregate) : propertyname in datum (data to aggregate)] => repeat X times
+
+    // Params:  1. Set: [fieldname in datum (where the result will be saved) : multiplier for each value]
+    //          2. Set: [fieldname in parser created datum (where data is fetched) : fieldname in datum (where data is fetched)] => repeat X times
     static def calculateSum(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
+        checkIfParamsSetCorrectly("calculateSum", procedure)
+
         String multiplier = procedure.parameterWrappers.first().parameters.asList().first().right_value
-        String property_identifier = procedure.parameterWrappers.first().parameters.asList().first().left_value
+        String fieldName = procedure.parameterWrappers.first().parameters.asList().first().left_value
         def fields_to_aggregate = procedure.parameterWrappers.asList()[1].parameters.asList()
         def converted_fields = new ArrayList()
-        // TODO think float through (floating point error)
         float result = 0
 
         fields_to_aggregate.each{
@@ -208,21 +301,22 @@ class TransformationService {
             result += (it * ((multiplier == null || multiplier.equals("") || Float.parseFloat(multiplier) == 0) ? 1 : Float.parseFloat(multiplier)))
         }
 
-        if(datum.get(property_identifier) == null)
-            datum.put(property_identifier, "")
-        datum[property_identifier] = result
+        if(datum.get(fieldName) == null)
+            datum.put(fieldName, "")
+        datum[fieldName] = result
 
         return [datum, null]
     }
 
-    // Params:  1. Set: [propertyname in datum (where the result gets saved) : multiplier for each value]
-    //          2. Set: [propertyname in datum (data to aggregate) : propertyname in datum (data to aggregate)] => repeat X times
+    // Params:  1. Set: [fieldname in datum (where the result will be saved) : multiplier for each value]
+    //          2. Set: [fieldname in parser created datum (where data is fetched) : fieldname in datum (where data is fetched)] => repeat X times
     static def calculateMean(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
+        checkIfParamsSetCorrectly("calculateMean", procedure)
+
         String multiplier = procedure.parameterWrappers.first().parameters.asList().first().right_value
-        String property_identifier = procedure.parameterWrappers.first().parameters.asList().first().left_value
+        String fieldName = procedure.parameterWrappers.first().parameters.asList().first().left_value
         def fields_to_aggregate = procedure.parameterWrappers.asList()[1].parameters.asList()
         def converted_fields = new ArrayList()
-        // TODO think float through (floating point error)
         float result = 0
 
         fields_to_aggregate.each{
@@ -239,34 +333,69 @@ class TransformationService {
         }
         result /= count
 
-        if(datum.get(property_identifier) == null)
-            datum.put(property_identifier, "")
-        datum[property_identifier] = result
+        if(datum.get(fieldName) == null)
+            datum.put(fieldName, "")
+        datum[fieldName] = result
 
         return [datum, null]
     }
 
-    // TODO and add to MethodInfo
-    static def setNull(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
-        // TODO
-        return [datum, null]
-    }
-
-    // TODO and add to MethodInfo
+    // TODO Doc note => Can set something to "" (empty)
+    // Params:  1. Set: [fieldname in datum (where the result will be saved) : fieldname in parser created datum (where data is fetched)]
+    //          2. Set: [regex pattern : replacement value]
     static def regexReplace(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
-        // TODO
+        checkIfParamsSetCorrectly("regexReplace", procedure)
+
+        String fieldName = procedure.parameterWrappers.first().parameters.asList().first().left_value
+        String fieldToFetch = procedure.parameterWrappers.first().parameters.asList().first().right_value
+        String regexPattern = procedure.parameterWrappers.asList()[1].parameters.asList().first().left_value
+        String replacement = procedure.parameterWrappers.asList()[1].parameters.asList().first().right_value
+
+        if(datum.get(fieldName) == null)
+            datum.put(fieldName, "")
+
+        datum[fieldName] = datum[fieldToFetch].toString().replaceAll(regexPattern, Matcher.quoteReplacement(replacement))
+
         return [datum, null]
     }
 
-    // Params:  1. Set: [propertyname in datum (where we save the result) : classname]
-    //          2. Set: [propertyname in class we are looking for : value for the property] => repeat X times
+    // Params:  1. Set: [fieldname in datum (where the first non-empty field is saved) : Empty]
+    //          2. Set: [fieldname in datum (where value is fetched) : fieldname in datum (where value is fetched)] => repeat X times
+    static def setValueFromOptionalValues(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
+        checkIfParamsSetCorrectly("setValueFromOptionalValues", procedure)
+
+        def fieldName = procedure.parameterWrappers.first().parameters.asList().first().left_value
+        def fields = procedure.parameterWrappers.asList()[1].parameters.asList()
+
+        if(datum.get(fieldName) == null)
+            datum.put(fieldName, "")
+
+        // TODO Doc note => Converts to string, which is then later converted to the corresponding type of the property => see identityTransfer
+        fields.each{
+            if(datum[it.left_value] != "" && datum[it.left_value] != null && datum[it.left_value] != "null") {
+                datum[fieldName] = datum[it.left_value]
+                return
+            }
+            else if(datum[it.right_value] != "" && datum[it.right_value] != null && datum[it.right_value] != "null") {
+                datum[fieldName] = datum[it.right_value]
+                return
+            }
+        }
+
+        return [datum, null]
+    }
+
+/*  // TODO Doc note => This function was removed because special_value adds unnecessary complexity. e.g. special_value is set but right_value was updated later and the program still uses special_value
+    // Params:  1. Set: [fieldname in datum : Classname for search query]
+    //          2. Set: [propertyname in class (search query) : value for the property] => repeat X times
     static def findAndCacheRelation(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
-        def params = procedure.parameterWrappers.asList()[0].parameters.asList()
+        checkIfParamsSetCorrectly("findAndCacheRelation", procedure)
+
+        def params = procedure.parameterWrappers.first().parameters.asList()
         def search_params = procedure.parameterWrappers.asList()[1].parameters.asList()
 
-        // TODO check if params[0].right_value is not null
         Class target_class = getClassFromString(params[0].right_value)
-        /*Object instance = target_class.newInstance()    //eg TestResponsibility
+        *//*Object instance = target_class.newInstance()    //eg TestResponsibility
 
         //build objectCriteria for searching object
         for(int i = 0; i < search_params.size(); i++)
@@ -275,37 +404,65 @@ class TransformationService {
             else if(search_params[i].right_value != null)
                 instance[search_params[i].left_value] = search_params[i].right_value
             else
-                instance[search_params[i].left_value] = search_params[i].special_value*/
+                instance[search_params[i].left_value] = search_params[i].special_value*//*
 
-        List found_objects = target_class.where{
-            search_params.each{
-                if(it.right_value != null && datum[it.right_value] != null)
+        StringBuilder propertiesErrorString = new StringBuilder()
+
+        List found_objects = target_class.findAll{
+            search_params.each {
+                if (it.right_value != null && datum[it.right_value] != null) {
                     eq it.left_value, datum[it.right_value]
-                else if(it.right_value != null)
+                    propertiesErrorString.append(" " + it.left_value + "->" + datum[it.right_value] + ";")
+                } else if (it.right_value != null) {
                     eq it.left_value, it.right_value
-                else
+                    propertiesErrorString.append(" " + it.left_value + "->" + it.right_value + ";")
+                } else {
                     eq it.left_value, it.special_value
+                    propertiesErrorString.append(" " + it.left_value + "->" + it.special_value + ";")
+                }
             }
-        }.list()
+        }
 
-        if(found_objects.size() > 1)
-        // TODO: exception
-            println("exception!")
+        if(found_objects.size() > 1) {
+            StringBuilder updateCriteriaErrorString = new StringBuilder()
+            updateCriteriaErrorString.append("Problematic object is of type '${target_class.name}' with its compared properties being values:${propertiesErrorString.toString()}")
 
+            throw new ValidationException("Found multiple objects in database which apply for the 'update' criteria! " +
+                    "Update criteria (or a combination of it) must be unique to each object! " + updateCriteriaErrorString.toString())
+        }
 
-        //TODO: check if we don't have to put a empty element into datum first
+        //TODO: Doc note => if nothing is found, it's set to null
         //find object with built criteria
         datum[params[0].left_value] = found_objects[0]
 
         return [datum, object_instance]
-    }
+    }*/
 
     //// Complex transformation-methods ////////////////////////////////////////////////////////////////////////////////
 
-    // Params:  1. Set: [propertyname in target class : Classname],
-    //          2. Set: [propertyname in class we are looking for : fieldname in datum] => repeat X times
+    // TODO Doc Note => example for querying timestamp "select * from relation_test_class where timestamp >= '2018-11-05'"
+    // Params:  1. Set: [propertyname in routine set target class : Empty]
+    static def setTimestamp(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
+        checkIfParamsSetCorrectly("setTimestamp", procedure)
+
+        def params = procedure.parameterWrappers.first().parameters.asList()
+
+//        if(object_instance.hasProperty("timestamp") == null)
+//            throw new ValidationException("Class '" + object_instance.toString() + "' does not have a property 'timestamp' which is required for the 'setTimestamp' method!")
+
+        object_instance[params.first().left_value] = new Timestamp(new Date().getTime())
+
+        return [datum, null]
+    }
+
+
+    // TODO Doc note => Problem with finding something through float. Don't do this. Cast to Int or something
+    // Params:  1. Set: [propertyname in routine set target class : Classname],
+    //          2. Set: [fieldname in parser created datum : propertyname in class (search query)] => repeat X times
     static def createRelation(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
-        def params = procedure.parameterWrappers.asList()[0].parameters.asList()
+        checkIfParamsSetCorrectly("createRelation", procedure)
+
+        def params = procedure.parameterWrappers.first().parameters.asList()
         def mapping = procedure.parameterWrappers.asList()[1].parameters.asList()
 
         Class target_class = getClassFromString(params.first().right_value)
@@ -314,17 +471,24 @@ class TransformationService {
         for(int i = 0; i < mapping.size(); i++)
             instance[mapping[i].left_value] = datum[mapping[i].right_value]*/
 
-        List found_objects = target_class.where{
+        StringBuilder propertiesErrorString = new StringBuilder()
+
+        List found_objects = target_class.findAll{
             mapping.each{
-                eq it.left_value, datum[it.right_value]
+                eq it.right_value, datum[it.left_value]
+                propertiesErrorString.append(" " + it.left_value + "->" + datum[it.right_value] + ";")
             }
-        }.list()
+        }
 
-        if(found_objects.size() > 1)
-        // TODO: exception
-            println("exception!")
+        if(found_objects.size() > 1){
+            StringBuilder updateCriteriaErrorString = new StringBuilder()
+            updateCriteriaErrorString.append("Problematic object is of type '${target_class.name}' with its compared properties being values:${propertiesErrorString.toString()}")
 
-        object_instance[params.first().left_value] = found_objects[0]
+            throw new ValidationException("Found multiple objects in database which apply for the 'update' criteria! " +
+                    "Update criteria (or a combination of it) must be unique to each object! " + updateCriteriaErrorString.toString())
+        }
+
+        object_instance[params[0].left_value] = found_objects[0]
 
         //print("ID: " + instance.objectNrInternal + ",product: " + instance.product)
 
@@ -336,27 +500,32 @@ class TransformationService {
     }
 
 
-    // TODO: note => first set is always the name of the property in the target class. This is important for createNewProcedure
-    // TODO: For the UI, ask which transformationmethod and then set the parameters accordingly to the params
-    // The new procedure will only be called last in the transformationroutine to prevent runtime inconsistencies.
+    // TODO: Doc note => first set is always the name of the property in the target class. This is important for createNewProcedure
+    // TODO: Doc note => second set is optional. This means if there is no second set, then the third set becomes the second set
+    // This is done to keep methods consistent with other methods and to have the last wrapper be the one where params are fetched from the data
+
+    // The new procedure will only be called last in the transformationroutine in an attempt to prevent runtime inconsistencies.
     // E.g. it's not possible to call it early, if the corresponding data is not the first entry in a file.
     // Params:  1. Set: [transformationmethod-name : is repetitive("true"/"false")],
     //          and "notable objects": ["name of field", "value"] => repeat X times
-    //          2. Set: [propertyname of a class : name of field in datum, in which the value is saved]
+    //          2. Set (optional): [left value of parameter for procedure : right value of parameter for procedure]
+    //              cont. => just passing on parameters to the next procedure, which might be needed => repeat X times
+    //          3. Set: [propertyname of routine set class : name of field in datum, in which the value is saved]
     //              cont. => basically fishing parameters from the current datum, as a fixed value, for the next procedure => repeat X times
     //              cont. #2 => this is the whole reason why we need the whole "createNewProcedure" sequence.
-    //          3. Set (optional): [left value of parameter for procedure : right value of parameter for procedure]
-    //              cont. => just passing on parameters to the next procedure, which might be needed => repeat X times
-    static def createNewTemporaryProcedure(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
-        def params_procedure = procedure.parameterWrappers.first().parameters.asList()
-        def runtime_params = procedure.parameterWrappers.asList()[1].parameters.asList()
-        ParamEntryWrapper params_to_pass = null
 
+    static def cacheInfoForCrossProcedure(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
+        checkIfParamsSetCorrectly("cacheInfoForCrossProcedure", procedure)
+
+        def params_procedure = procedure.parameterWrappers.first().parameters.asList()
 
         // Stuff for the new procedure
-        SortedSet<ParamEntryWrapper> new_wraps = new TreeSet<ParamEntryWrapper>()
+        // First left_value is the methodname of the cross-method
         def methodname = params_procedure[0].left_value
         MethodClosure method = TransformationService.&"$methodname"
+
+        def runtime_params = procedure.parameterWrappers.asList()[MethodInfo.getWrapperCount(methodname)].parameters.asList()
+        SortedSet<ParamEntryWrapper> new_wraps = new TreeSet<ParamEntryWrapper>()
         ArrayList<ParamEntry> params_for_new_wrap = new ArrayList<ParamEntry>()
         ParamEntryWrapper new_runtime_param_wrap
         Map<String, String> notable_objects = [:]
@@ -364,19 +533,17 @@ class TransformationService {
         for(int i = 1; i < params_procedure.size(); i++)
             notable_objects.put(params_procedure[i].left_value, params_procedure[i].right_value)
 
-        if(procedure.parameterWrappers.size() == 3)
-            params_to_pass = procedure.parameterWrappers.asList()[2]
-
-        // TODO restrict order_id at creation of the procedure at the length of the procedure array of the routine
+        // TODO: Doc note => No problem with order_id because the temp procedure is always last at runtime
         int order_id = 0
         TransformationRoutine tr = TransformationRoutine.find("from TransformationRoutine where ? in elements(procedures)", [procedure])
-        tr.procedures.each {
-            if(it.order_id > order_id)
-                order_id = it.order_id
-        }
+        /*tr.procedures.order_id.each {
+            if(it > order_id)
+                order_id = it
+        }*/
+        order_id = -1
 
         runtime_params.each{
-            params_for_new_wrap.add(new ParamEntry(it.left_value, datum[it.right_value]))
+            params_for_new_wrap.add(new ParamEntry(it.left_value, datum[it.right_value].toString()))
         }
 
         params_for_new_wrap.each{it.save(flush: true)}
@@ -384,12 +551,12 @@ class TransformationService {
         new_runtime_param_wrap = new ParamEntryWrapper(params_for_new_wrap)
         new_runtime_param_wrap.save(flush: true)
 
-        // TODO: Note in Document how the order doesn't matter because the list gets sorted on its own anyways
+        // TODO: Doc note => the order doesn't matter because the list gets sorted on its own anyways
         new_wraps.add(new_runtime_param_wrap)
-        if(params_to_pass != null)
-            new_wraps.add(params_to_pass)
+        if(procedure.parameterWrappers.size() == 3)
+            new_wraps.add(procedure.parameterWrappers.asList()[1])
 
-        TransformationProcedure tp = new TransformationProcedure(order_id: order_id + 1, transformation_method: method,
+        TransformationProcedure tp = new TransformationProcedure(order_id: order_id /* + 1*/, transformation_method: method,
                 is_repetitive: Boolean.parseBoolean((params_procedure[0].right_value as String)), temporary: true, notable_objects: notable_objects)
         tp.parameterWrappers = new_wraps
         tp.save(flush: true)
@@ -399,101 +566,175 @@ class TransformationService {
         return [datum, object_instance]
     }
 
-    // Params:  1. Set: [propertyname in object which is set as the foreign key : classname]
-    //          2. Set: [propertyname in object which is used for the search : value for the property] => repeat X times
+    // Params:  1. Set: [propertyname in object which is set as the foreign key (defined by routine) : classname]
+    //          2. Set: [propertyname in object which is used for the search : value for the property (set by 'cacheInfoForCrossProcedure')] => repeat X times
     // So basically, the instance which is found in the database with the properties specified by the 2. set,
     // is then saved in the property specified by the 1. set
     static def crossCreateRelation(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
+        checkIfParamsSetCorrectly("crossCreateRelation", procedure)
 
-        def params = procedure.parameterWrappers.asList()[0].parameters.asList()
+        def params = procedure.parameterWrappers.first().parameters.asList()
         def search_params = procedure.parameterWrappers.asList()[1].parameters.asList()
 
-        // TODO check if params[0].right_value is not null
         Class target_class = getClassFromString(params[0].right_value)
+
+        // Is used for the method "parseToCorrespondingType"
         Object instance = target_class.newInstance()    //eg TestResponsibility
 
-        //build objectCriteria for searching object
-        for(int i = 0; i < search_params.size(); i++)
-            if(search_params[i].special_value != null)
-                instance[search_params[i].left_value] = search_params[i].special_value   //eg special_value = **AM_NEU**
-            else
-                instance[search_params[i].left_value] = search_params[i].right_value
+        StringBuilder propertiesErrorString = new StringBuilder()
 
-        // TODO check if object can be found, else throw an exception
+        //build objectCriteria for searching object
+        List found_objects = target_class.findAll {
+            search_params.each {
+                /*if (it.special_value != null) {
+                    eq it.left_value, it.special_value   //eg special_value = **AM_NEU**
+                    propertiesErrorString.append(" " + it.left_value + "->" + it.special_value + ";")
+                }
+                else */if (it.right_value != null) {
+                    eq it.left_value, parseToCorrespondingType(instance[it.left_value], it.right_value)
+                    propertiesErrorString.append(" " + it.left_value + "->" + it.right_value + ";")
+                }
+                else
+                    new ValidationException("Right value of parameter of method 'crossCreateRelation' has no values set!")
+            }
+        }
+
+//        for(int i = 0; i < search_params.size(); i++)
+//            if(search_params[i].special_value != null)
+//                instance[search_params[i].left_value] = search_params[i].special_value   //eg special_value = **AM_NEU**
+//            else if(search_params[i].right_value != null)
+//                instance[search_params[i].left_value] = search_params[i].right_value
+//            else
+//                new ValidationException("Right value of parameter of method 'crossCreateRelation' has no values set!")
+
+        // TODO: Doc note => if nothing is found, it's set to null
         //find object with built criteria
-        object_instance[params[0].left_value] = target_class.find(instance)
+        //object_instance[params[0].left_value] = target_class.find(instance)
+
+        if (found_objects.size() > 1) {
+            StringBuilder updateCriteriaErrorString = new StringBuilder()
+            updateCriteriaErrorString.append("Problematic object is of type '${target_class.name}' with its compared properties being values:${propertiesErrorString.toString()}")
+
+            throw new ValidationException("Found multiple objects in database which apply for the 'search' criteria! " +
+                    "Update criteria (or a combination of it) must be unique to each object! " + updateCriteriaErrorString.toString())
+        }
+
+        object_instance[params[0].left_value] = found_objects[0]
 
         // e.g. params[0].left_value = responsibility
         //object_instance is object from class ColumnWidthTest so columWidthTest["responsibility"]=TestResponsibility.find(object with criteria name =  **AM_NEU**
-        object_instance.save(flush: true)
+        //object_instance.save(flush: true)
 
         //datum ... Map of String of one tableLine
         //object_instance is the correlating object to one datum e.g. of class ColumnWidthTest
         return [datum, object_instance]
     }
 
-    // Params:  1. Set: [propertyname in target class : value for the property] => repeat X times
-    static def crossAddValue(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
-        def value_map = procedure.parameterWrappers.asList()[0].parameters.asList()
+    // Params:  1. Set: [propertyname in routine set target class : value for property] => repeat X times
+    static def crossSetValue(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
+        checkIfParamsSetCorrectly("crossSetValue", procedure)
 
-        // TODO: exception
+        def value_map = procedure.parameterWrappers.first().parameters.asList()
+
         value_map.each{
-            if(it.special_value != null)
+            /*if(it.special_value != null)
                 object_instance[it.left_value] = it.special_value
-            else if(it.right_value != null)
-                object_instance[it.left_value] = it.right_value
+            else */if(it.right_value != null)
+                object_instance[it.left_value] = parseToCorrespondingType(object_instance[it.left_value], it.right_value)
             else
-                println("Should never arrive here!")
+                new ValidationException("Right value of parameter of method 'crossAddValue' has no values set!")
         }
 
-        object_instance.save(flush: true)
+        //object_instance.save(flush: true)
 
         return [datum, object_instance]
     }
 
-    // TODO think long and hard if a "concatenate"-flag is needed when loading into db
     // Loading methods ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Params:  1. Set: [propertyname of target class : name of field in datum] => repeat X times
-    static def identityTransfer(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) throws ConstraintException {
-        def IO_map = procedure.parameterWrappers.first().parameters.asList()
+    // Params:  1. Set: [fieldname in parser created datum : propertyname in routine set target class] => repeat X times
+    static def identityTransfer(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
+        checkIfParamsSetCorrectly("identityTransfer", procedure)
 
+        def IO_map = procedure.parameterWrappers.first().parameters.asList()
         IO_map.each{ mapping ->
 
-            if(object_instance.metaClass.getProperties().find{ class_it -> class_it.name == mapping.left_value} == null)
-                throw new IncorrectSpecificationException("Can not find class with name '" + mapping.left_value + "'!")
+            if(object_instance.metaClass.getProperties().find{ class_it -> class_it.name == mapping.right_value} == null)
+                throw new IncorrectSpecificationException("Can not find class with name '" + mapping.right_value + "'!")
 
             // so "optional" and "multiple" used in certain parser work.
-            if(datum[mapping.right_value] != null)
+            if(datum[mapping.left_value] != null) {
 
-            // so we can add "multiple" objects to a list instead of only setting entries
-                if(object_instance.metaClass.getProperties().find{ class_it -> class_it.name == mapping.left_value}.type in Collection)
-                    if(object_instance[mapping.left_value] == null)
-                        object_instance[mapping.left_value] = [datum[mapping.right_value]]
+                // so we can add "multiple" objects to a list instead of only setting entries
+/*                if (object_instance.metaClass.getProperties().find { class_it -> class_it.name == mapping.right_value }.type in Collection)
+                    if (object_instance[mapping.right_value] == null)
+                        object_instance[mapping.right_value] = [datum[mapping.left_value]]
                     else
-                        object_instance[mapping.left_value].add(datum[mapping.right_value])
+                        object_instance[mapping.right_value].add(datum[mapping.left_value])
                 else
-                    object_instance[mapping.left_value] = datum[mapping.right_value]
+                    object_instance[mapping.right_value] = parseToCorrespondingType(object_instance[mapping.right_value], datum[mapping.left_value].toString())*/
+
+                // TODO Doc Note => Had some logic in place to add/create arrays for objects which have array properties,
+                // but decided against it in the end because of the added complexity and because most parsers only deal with primitive properties anyways
+                object_instance[mapping.right_value] = parseToCorrespondingType(object_instance[mapping.right_value], datum[mapping.left_value].toString())
+            }
+        }
+
+        return [datum, object_instance]
+    }
+
+    // Params:  1. Set: [fieldname in parser created datum : propertyname in routine set target class] => repeat X times
+    static def identityTransferAndSave(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
+        checkIfParamsSetCorrectly("identityTransferAndSave", procedure)
+
+        def IO_map = procedure.parameterWrappers.first().parameters.asList()
+        IO_map.each{ mapping ->
+
+            if(object_instance.metaClass.getProperties().find{ class_it -> class_it.name == mapping.right_value} == null)
+                throw new IncorrectSpecificationException("Can not find class with name '" + mapping.right_value + "'!")
+
+            // so "optional" and "multiple" used in certain parser work.
+            if(datum[mapping.left_value] != null) {
+
+                // so we can add "multiple" objects to a list instead of only setting entries
+/*                if (object_instance.metaClass.getProperties().find { class_it -> class_it.name == mapping.right_value }.type in Collection)
+                    if (object_instance[mapping.right_value] == null)
+                        object_instance[mapping.right_value] = [datum[mapping.left_value]]
+                    else
+                        object_instance[mapping.right_value].add(datum[mapping.left_value])
+                else
+                    object_instance[mapping.right_value] = parseToCorrespondingType(object_instance[mapping.right_value], datum[mapping.left_value].toString())*/
+
+                // TODO Doc Note => Had some logic in place to add/create arrays for objects which have array properties,
+                // but decided against it in the end because of the added complexity and because most parsers only deal with primitive properties anyways
+                object_instance[mapping.right_value] = parseToCorrespondingType(object_instance[mapping.right_value], datum[mapping.left_value].toString())
+            }
         }
 
         object_instance.save(flush: true)
 
-        if(object_instance.hasErrors())
-            throw new ConstraintException("There was an error while loading the data into the database. Maybe some constraints are not fulfilled?")
+        if(object_instance.hasErrors()) {
+            StringBuilder errorString = new StringBuilder()
+            object_instance.errors.allErrors.each { errorString.append(it.toString() + ";") }
+            throw new DatabaseSaveException("There was an error while loading the data into the database. Maybe some constraints are not fulfilled?\n" + errorString.toString())
+        }
 
         return [datum, object_instance]
-
     }
 
-    // TODO: exception if load fails (exception if there is an error after .save(flush: true))
-    // TODO: if to_update is set, but object is not different from the one in the db => don't save
+    // Params:  No Params
+    static def saveAllObjects(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
+        checkIfParamsSetCorrectly("saveAllObjects", procedure)
 
-    // TODO and validate in MethodInfo
-    static def saveAll(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
+        object_instance.save(flush: true)
 
+        if(object_instance.hasErrors()) {
+            StringBuilder errorString = new StringBuilder()
+            object_instance.errors.allErrors.each { errorString.append(it.toString() + ";") }
+            throw new DatabaseSaveException("There was an error while loading the data into the database. Maybe some constraints are not fulfilled?\n" + errorString.toString())
+        }
+
+        return [datum, object_instance]
     }
 
-    // TODO and validate in MethodInfo
-    static def saveAllWhere(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
-
-    }
+    // TODO Doc note => no conditional saves because we have other tools to filter entries and thus objects (i.e. notable objects)
 }

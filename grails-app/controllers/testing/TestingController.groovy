@@ -1,12 +1,6 @@
 package testing
 
 import extraction.*
-import extraction.AllowedFiletype
-import extraction.ColumnWidthEntry
-import extraction.ColumnWidthParser
-import extraction.EntryDatatype
-import extraction.TokenSplitEntry
-import extraction.TokenSplitParser
 import transformation.ParamEntry
 import transformation.ParamEntryWrapper
 import transformation.TransformationProcedure
@@ -46,15 +40,15 @@ class TestingController {
     static bootstrap(){
 
         ArrayList<TokenSplitEntry> tse_array = new ArrayList<TokenSplitEntry>()
-        tse_array.add(new TokenSplitEntry(field: "facility", splitIndizes: [0], optional: true, dataType: EntryDatatype.INTEGER))
-        tse_array.add(new TokenSplitEntry(field: "false_field", splitIndizes: [0], optional: true, dataType: EntryDatatype.STRING)) // False entry for testing
-        tse_array.add(new TokenSplitEntry(field: "dateCreated", splitIndizes: [1], dataType: EntryDatatype.STRING))
-        tse_array.add(new TokenSplitEntry(field: "product", splitIndizes: [2], dataType: EntryDatatype.STRING))
-        tse_array.add(new TokenSplitEntry(field: "pumps", splitIndizes: [4,6,8,10,12,14], dataType: EntryDatatype.FLOAT, multiple: true, optional: true))
-        tse_array.add(new TokenSplitEntry(field: "comment", splitIndizes: [4,6,8,10,12,14,16], dataType: EntryDatatype.STRING, multiple: false, optional: true))
+        tse_array.add(new TokenSplitEntry(field: "facility", splitIndizes: [0], optional: true, dataType: EntryDataType.INTEGER))
+        tse_array.add(new TokenSplitEntry(field: "false_field", splitIndizes: [0], optional: true, dataType: EntryDataType.STRING)) // False entry for testing
+        tse_array.add(new TokenSplitEntry(field: "dateCreated", splitIndizes: [1], dataType: EntryDataType.STRING))
+        tse_array.add(new TokenSplitEntry(field: "product", splitIndizes: [2], dataType: EntryDataType.STRING))
+        tse_array.add(new TokenSplitEntry(field: "pumps", splitIndizes: [4,6,8,10,12,14], dataType: EntryDataType.FLOAT, multiple: true, optional: true))
+        tse_array.add(new TokenSplitEntry(field: "comment", splitIndizes: [4,6,8,10,12,14,16], dataType: EntryDataType.STRING, multiple: false, optional: true))
         tse_array.each({it.save(flush: true)})
 
-        TokenSplitParser tsp = new TokenSplitParser(selectorName: "Avanti_Produktmengen", selectorFileType: AllowedFiletype.TXT,
+        TokenSplitParser tsp = new TokenSplitParser(selectorName: "Avanti_Produktmengen", selectorFileType: AllowedFileType.TXT,
                 name: "Avanti_produktmengen_parser", token: " ", linesToIgnore: ["+++ ERDGAS +++", "TS--"],
                 description: "A parsing for Files, where each line represents an Object and each entry is separated by a token. e.g. ',', ';', ' '")
 
@@ -64,21 +58,21 @@ class TestingController {
         tsp.save(flush: true)
 
         ArrayList<ColumnWidthEntry> cwe_array = new ArrayList<ColumnWidthEntry>()
-        cwe_array.add(new ColumnWidthEntry(field: "standort", columnStart: 1, columnEnd: 9, optional: false, dataType: EntryDatatype.STRING, trim: true))
-        cwe_array.add(new ColumnWidthEntry(field: "sap", columnStart: 9, columnEnd: 18, optional: false, dataType: EntryDatatype.INTEGER, trim: true))
-        cwe_array.add(new ColumnWidthEntry(field: "marke", columnStart: 18, columnEnd: 25, optional: false, dataType: EntryDatatype.STRING, trim: true))
-        cwe_array.add(new ColumnWidthEntry(field: "betreiber", columnStart: 25, columnEnd: 48, optional: false, dataType: EntryDatatype.STRING, trim: true))
-        cwe_array.add(new ColumnWidthEntry(field: "plz", columnStart: 48, columnEnd: 54, optional: false, dataType: EntryDatatype.INTEGER, trim: true))
-        cwe_array.add(new ColumnWidthEntry(field: "ort", columnStart: 54, columnEnd: 78, optional: false, dataType: EntryDatatype.STRING, trim: true))
-        cwe_array.add(new ColumnWidthEntry(field: "straße", columnStart: 78, columnEnd: 104, optional: false, dataType: EntryDatatype.STRING, trim: true))
-        cwe_array.add(new ColumnWidthEntry(field: "nr", columnStart: 104, columnEnd: 110, optional: false, dataType: EntryDatatype.STRING, trim: true))
-        cwe_array.add(new ColumnWidthEntry(field: "modell", columnStart: 110, columnEnd: 119, optional: false, dataType: EntryDatatype.STRING, trim: true))
-        cwe_array.add(new ColumnWidthEntry(field: "area_manager_alt", columnStart: 119, columnEnd: 139, optional: false, dataType: EntryDatatype.STRING, trim: true))
-        cwe_array.add(new ColumnWidthEntry(field: "area_manager_neu", columnStart: 139, columnEnd: 163, optional: false, dataType: EntryDatatype.STRING, trim: true))
-        cwe_array.add(new ColumnWidthEntry(field: "techniker", columnStart: 163, columnEnd: 176, optional: false, dataType: EntryDatatype.STRING, trim: true))
+        cwe_array.add(new ColumnWidthEntry(field: "standort", columnStart: 1, columnEnd: 9, optional: false, dataType: EntryDataType.STRING, trim: true))
+        cwe_array.add(new ColumnWidthEntry(field: "sap", columnStart: 9, columnEnd: 18, optional: false, dataType: EntryDataType.INTEGER, trim: true))
+        cwe_array.add(new ColumnWidthEntry(field: "marke", columnStart: 18, columnEnd: 25, optional: false, dataType: EntryDataType.STRING, trim: true))
+        cwe_array.add(new ColumnWidthEntry(field: "betreiber", columnStart: 25, columnEnd: 48, optional: false, dataType: EntryDataType.STRING, trim: true))
+        cwe_array.add(new ColumnWidthEntry(field: "plz", columnStart: 48, columnEnd: 54, optional: false, dataType: EntryDataType.INTEGER, trim: true))
+        cwe_array.add(new ColumnWidthEntry(field: "ort", columnStart: 54, columnEnd: 78, optional: false, dataType: EntryDataType.STRING, trim: true))
+        cwe_array.add(new ColumnWidthEntry(field: "straße", columnStart: 78, columnEnd: 104, optional: false, dataType: EntryDataType.STRING, trim: true))
+        cwe_array.add(new ColumnWidthEntry(field: "nr", columnStart: 104, columnEnd: 110, optional: false, dataType: EntryDataType.STRING, trim: true))
+        cwe_array.add(new ColumnWidthEntry(field: "modell", columnStart: 110, columnEnd: 119, optional: false, dataType: EntryDataType.STRING, trim: true))
+        cwe_array.add(new ColumnWidthEntry(field: "area_manager_alt", columnStart: 119, columnEnd: 139, optional: false, dataType: EntryDataType.STRING, trim: true))
+        cwe_array.add(new ColumnWidthEntry(field: "area_manager_neu", columnStart: 139, columnEnd: 163, optional: false, dataType: EntryDataType.STRING, trim: true))
+        cwe_array.add(new ColumnWidthEntry(field: "techniker", columnStart: 163, columnEnd: 176, optional: false, dataType: EntryDataType.STRING, trim: true))
         cwe_array.each({it.save(flush: true)})
 
-        ColumnWidthParser cwp = new ColumnWidthParser(selectorName: "CODOS", selectorFileType: AllowedFiletype.TXT,
+        ColumnWidthParser cwp = new ColumnWidthParser(selectorName: "CODOS", selectorFileType: AllowedFileType.TXT,
                 name: "CODOS_parser", // linesToIgnore: ["Standort   SAP  "],
                 description: "A parsing for Files, where each Column has a fixed width")
         cwp.entries = new TreeSet(cwe_array)
@@ -99,7 +93,7 @@ class TestingController {
         cwp.routines.add(tr_cwp2)
 
 
-        // Create Address and Contact once /////////////////////////////////////////////////////////////////////////////
+        // Create address and contact once /////////////////////////////////////////////////////////////////////////////
         TransformationProcedure tp_cwp1 = new TransformationProcedure(order_id: 1, transformation_method: TransformationService.&splitStringField,
                 notable_objects: ["area_manager_neu" : "** AM NEU **"])
         paramList_cwp.clear()
@@ -188,7 +182,7 @@ class TestingController {
         cwp.routines.add(tr_cwp2)
 
 
-        TransformationProcedure tp4 = new TransformationProcedure(order_id: 1, transformation_method: TransformationService.&createNewTemporaryProcedure,
+        TransformationProcedure tp4 = new TransformationProcedure(order_id: 1, transformation_method: TransformationService.&cacheInfoForCrossProcedure,
                 is_repetitive: false, notable_objects: ["area_manager_neu" : "** AM NEU **"])
         paramList_cwp.clear()
         //create process
@@ -200,7 +194,7 @@ class TestingController {
         tp4.parameterWrappers.add(pw)
         paramList_cwp.clear()
         //find by value in datum for field
-        //eg look in ResponsibilityKind property name if entry  with datum-value with datum-key "area_manager_neu" exists
+        //eg look in ResponsibilityKind property name if entry with datum-value with datum-key "area_manager_neu" exists
         paramList_cwp.add(new ParamEntry("name", "area_manager_neu"))
         paramList_cwp.each{it.save(flush: true)}
         pw = new ParamEntryWrapper(paramList_cwp)
@@ -238,7 +232,7 @@ class TestingController {
         tp_cwp1 = new TransformationProcedure(order_id: 3, transformation_method: TransformationService.&identityTransfer,
                 notable_objects: ["area_manager_neu" : "** AM NEU **"])
         paramList_cwp.clear()
-        // TODO: write a notice in the document => paramList has to be a ArrayList at first, because a TreeSet immediately works with "compareTo()"
+        // TODO: Doc note => paramList has to be a ArrayList at first, because a TreeSet immediately works with "compareTo()"
         // "compareTo()" can not be called though, because ParamEntry compares with it's ID, which does not exist when the object is not persisted
         //ParamEntry(ObjectAttributeName, ImportAttributeName)
         paramList_cwp.add(new ParamEntry("standort", "standort"))
@@ -265,7 +259,7 @@ class TestingController {
         cwp.routines.add(tr_cwp1)
 
 
-        tp4 = new TransformationProcedure(order_id: 1, transformation_method: TransformationService.&createNewTemporaryProcedure,
+        tp4 = new TransformationProcedure(order_id: 1, transformation_method: TransformationService.&cacheInfoForCrossProcedure,
                 is_repetitive: false, notable_objects: ["sap" : "1626730"])
         paramList_cwp.clear()
         paramList_cwp.add(new ParamEntry("crossAddValue", "true"))
@@ -423,11 +417,11 @@ class TestingController {
 
 
         ArrayList<SimpleTagEntry> stp_array = new ArrayList<SimpleTagEntry>()
-        stp_array.add(new SimpleTagEntry(field: "custom_value", dataType: EntryDatatype.STRING, startTag: "\"custom_value\": \"", endTag: "\",", optional: true))
-        stp_array.add(new SimpleTagEntry(field: "timestamp", dataType: EntryDatatype.STRING, startTag: "\"timestamp\": \"" , endTag: "\""))
+        stp_array.add(new SimpleTagEntry(field: "custom_value", dataType: EntryDataType.STRING, startTag: "\"custom_value\": \"", endTag: "\",", optional: true))
+        stp_array.add(new SimpleTagEntry(field: "timestamp", dataType: EntryDataType.STRING, startTag: "\"timestamp\": \"" , endTag: "\""))
         stp_array.each{it.save(flush: true)}
 
-        SimpleTagParser stp = new SimpleTagParser(selectorName: "json", selectorFileType: AllowedFiletype.TXT, name: "Jsonparser", description: "Tagparser for simple json files.")
+        SimpleTagParser stp = new SimpleTagParser(selectorName: "json", selectorFileType: AllowedFileType.TXT, name: "Jsonparser", description: "Tagparser for simple json files.")
         stp.entries = new TreeSet(stp_array)
 
         TransformationProcedure stp_tp = new TransformationProcedure(order_id: 0, transformation_method: TransformationService.&identityTransfer)
@@ -453,12 +447,12 @@ class TestingController {
         stp.save(flush:true)
 
         stp_array = new ArrayList<SimpleTagEntry>()
-        stp_array.add(new SimpleTagEntry(field: "arrivalTime", dataType: EntryDatatype.FLOAT, startTag: "\"arrivalTime\": ", endTag: ","))
-        stp_array.add(new SimpleTagEntry(field: "boolValue", dataType: EntryDatatype.BOOLEAN, startTag: "\"boolValue\": " , endTag: ","))
-        stp_array.add(new SimpleTagEntry(field: "timestamp", dataType: EntryDatatype.FLOAT, startTag: "\"timestamp\": "))
+        stp_array.add(new SimpleTagEntry(field: "arrivalTime", dataType: EntryDataType.FLOAT, startTag: "\"arrivalTime\": ", endTag: ","))
+        stp_array.add(new SimpleTagEntry(field: "boolValue", dataType: EntryDataType.BOOLEAN, startTag: "\"boolValue\": " , endTag: ","))
+        stp_array.add(new SimpleTagEntry(field: "timestamp", dataType: EntryDataType.FLOAT, startTag: "\"timestamp\": "))
         stp_array.each{it.save(flush: true)}
 
-        stp = new SimpleTagParser(selectorName: "environment", selectorFileType: AllowedFiletype.JSON,
+        stp = new SimpleTagParser(selectorName: "environment", selectorFileType: AllowedFileType.JSON,
                 name: "Jsonparser 2", description: "Tagparser json file with bool value.", domainStartTag: "{", domainEndTag: "}")
         stp.entries = new TreeSet(stp_array)
 
@@ -491,14 +485,14 @@ class TestingController {
         // task_id, task_name, timestamp, url
 
         stp_array = new ArrayList<SimpleTagEntry>()
-        stp_array.add(new SimpleTagEntry(field: "task_id", dataType: EntryDatatype.INTEGER, startTag: "\"task_id\": ", endTag: ","))
-        stp_array.add(new SimpleTagEntry(field: "task_name", dataType: EntryDatatype.STRING, startTag: "\"task_name\": \"" , endTag: "\","))
-        stp_array.add(new SimpleTagEntry(field: "timestamp", dataType: EntryDatatype.LONG, startTag: "\"timestamp\": ", endTag: ","))
-        stp_array.add(new SimpleTagEntry(field: "url", dataType: EntryDatatype.STRING, startTag: "\"url\": \"", endTag: "\","))
-        stp_array.add(new SimpleTagEntry(field: "paragraphs", dataType: EntryDatatype.STRING, startTag: "\"paragraphs\": [", endTag: "]", arraySplitTag: ","))
+        stp_array.add(new SimpleTagEntry(field: "task_id", dataType: EntryDataType.INTEGER, startTag: "\"task_id\": ", endTag: ","))
+        stp_array.add(new SimpleTagEntry(field: "task_name", dataType: EntryDataType.STRING, startTag: "\"task_name\": \"" , endTag: "\","))
+        stp_array.add(new SimpleTagEntry(field: "timestamp", dataType: EntryDataType.LONG, startTag: "\"timestamp\": ", endTag: ","))
+        stp_array.add(new SimpleTagEntry(field: "url", dataType: EntryDataType.STRING, startTag: "\"url\": \"", endTag: "\","))
+        stp_array.add(new SimpleTagEntry(field: "paragraphs", dataType: EntryDataType.STRING, startTag: "\"paragraphs\": [", endTag: "]", arraySplitTag: ","))
         stp_array.each{it.save(flush: true)}
 
-        stp = new SimpleTagParser(selectorName: "queries", selectorFileType: AllowedFiletype.JSON, name: "Jsonparser 2",
+        stp = new SimpleTagParser(selectorName: "queries", selectorFileType: AllowedFileType.JSON, name: "Jsonparser 2",
                 description: "Tagparser for file which only has a single line with all entries.", domainStartTag: "{", domainEndTag: "}")
         stp.entries = new TreeSet(stp_array)
 
@@ -531,14 +525,14 @@ class TestingController {
         stp.save(flush:true)
 
         stp_array = new ArrayList<SimpleTagEntry>()
-        stp_array.add(new SimpleTagEntry(field: "task_id", dataType: EntryDatatype.INTEGER, startTag: "\"task_id\": ", endTag: ","))
-        stp_array.add(new SimpleTagEntry(field: "task_name", dataType: EntryDatatype.STRING, startTag: "\"task_name\": \"" , endTag: "\","))
-        stp_array.add(new SimpleTagEntry(field: "timestamp", dataType: EntryDatatype.LONG, startTag: "\"timestamp\": ", endTag: ","))
-        stp_array.add(new SimpleTagEntry(field: "url", dataType: EntryDatatype.STRING, startTag: "\"url\": \"", endTag: "\","))
-        stp_array.add(new SimpleTagEntry(field: "paragraphs", dataType: EntryDatatype.STRING, startTag: "\"paragraphs\": [\"", endTag: "\"]", arraySplitTag: "\", \""))
+        stp_array.add(new SimpleTagEntry(field: "task_id", dataType: EntryDataType.INTEGER, startTag: "\"task_id\": ", endTag: ","))
+        stp_array.add(new SimpleTagEntry(field: "task_name", dataType: EntryDataType.STRING, startTag: "\"task_name\": \"" , endTag: "\","))
+        stp_array.add(new SimpleTagEntry(field: "timestamp", dataType: EntryDataType.LONG, startTag: "\"timestamp\": ", endTag: ","))
+        stp_array.add(new SimpleTagEntry(field: "url", dataType: EntryDataType.STRING, startTag: "\"url\": \"", endTag: "\","))
+        stp_array.add(new SimpleTagEntry(field: "paragraphs", dataType: EntryDataType.STRING, startTag: "\"paragraphs\": [\"", endTag: "\"]", arraySplitTag: "\", \""))
         stp_array.each{it.save(flush: true)}
 
-        stp = new SimpleTagParser(selectorName: "queries", selectorFileType: AllowedFiletype.TXT, name: "Jsonparser txt-testversion",
+        stp = new SimpleTagParser(selectorName: "queries", selectorFileType: AllowedFileType.TXT, name: "Jsonparser txt-testversion",
                 description: "Tagparser for file which only has a single line with all entries.")
         stp.entries = new TreeSet(stp_array)
 
@@ -571,13 +565,13 @@ class TestingController {
         stp.save(flush:true)
 
         stp_array = new ArrayList<SimpleTagEntry>()
-        stp_array.add(new SimpleTagEntry(field: "arrivalTime", dataType: EntryDatatype.FLOAT, startTag: "\"arrivalTime\": ", endTag: ","))
-        stp_array.add(new SimpleTagEntry(field: "boolValue", dataType: EntryDatatype.BOOLEAN, startTag: "\"boolValue\": " , endTag: ","))
-        stp_array.add(new SimpleTagEntry(field: "timestamp", dataType: EntryDatatype.FLOAT, startTag: "\"timestamp\": "))
-        stp_array.add(new SimpleTagEntry(field: "type", dataType: EntryDatatype.STRING, startTag: "\"type\": \"", endTag: "\","))
+        stp_array.add(new SimpleTagEntry(field: "arrivalTime", dataType: EntryDataType.FLOAT, startTag: "\"arrivalTime\": ", endTag: ","))
+        stp_array.add(new SimpleTagEntry(field: "boolValue", dataType: EntryDataType.BOOLEAN, startTag: "\"boolValue\": " , endTag: ","))
+        stp_array.add(new SimpleTagEntry(field: "timestamp", dataType: EntryDataType.FLOAT, startTag: "\"timestamp\": "))
+        stp_array.add(new SimpleTagEntry(field: "type", dataType: EntryDataType.STRING, startTag: "\"type\": \"", endTag: "\","))
         stp_array.each{it.save(flush: true)}
 
-        stp = new SimpleTagParser(selectorName: "multiline", selectorFileType: AllowedFiletype.JSON,
+        stp = new SimpleTagParser(selectorName: "multiline", selectorFileType: AllowedFileType.JSON,
                 name: "Jsonparser 2", description: "Tagparser json multiline file", domainStartTag: "{", domainEndTag: "}")
         stp.entries = new TreeSet(stp_array)
 
@@ -611,13 +605,13 @@ class TestingController {
 
 
         stp_array = new ArrayList<SimpleTagEntry>()
-        stp_array.add(new SimpleTagEntry(field: "arrivalTime", dataType: EntryDatatype.FLOAT, startTag: "\"arrivalTime\": ", endTag: ","))
-        stp_array.add(new SimpleTagEntry(field: "boolValue", dataType: EntryDatatype.BOOLEAN, startTag: "\"boolValue\": " , endTag: ","))
-        stp_array.add(new SimpleTagEntry(field: "timestamp", dataType: EntryDatatype.FLOAT, startTag: "\"timestamp\": "))
-        stp_array.add(new SimpleTagEntry(field: "type", dataType: EntryDatatype.STRING, startTag: "\"type\": \"", endTag: "\","))
+        stp_array.add(new SimpleTagEntry(field: "arrivalTime", dataType: EntryDataType.FLOAT, startTag: "\"arrivalTime\": ", endTag: ","))
+        stp_array.add(new SimpleTagEntry(field: "boolValue", dataType: EntryDataType.BOOLEAN, startTag: "\"boolValue\": " , endTag: ","))
+        stp_array.add(new SimpleTagEntry(field: "timestamp", dataType: EntryDataType.FLOAT, startTag: "\"timestamp\": "))
+        stp_array.add(new SimpleTagEntry(field: "type", dataType: EntryDataType.STRING, startTag: "\"type\": \"", endTag: "\","))
         stp_array.each{it.save(flush: true)}
 
-        stp = new SimpleTagParser(selectorName: "nestingtest", selectorFileType: AllowedFiletype.JSON,
+        stp = new SimpleTagParser(selectorName: "nestingtest", selectorFileType: AllowedFileType.JSON,
                 name: "Jsonparser 3", description: "Tagparser for a nesting example, where a subobject is in the beginning of the domain.", domainStartTag: "{", domainEndTag: "}", nestingLevel: 1)
         stp.entries = new TreeSet(stp_array)
 
@@ -651,14 +645,14 @@ class TestingController {
 
 
         stp_array = new ArrayList<SimpleTagEntry>()
-        stp_array.add(new SimpleTagEntry(field: "arrivalTime", dataType: EntryDatatype.FLOAT, startTag: "\"arrivalTime\": ", endTag: ","))
-        stp_array.add(new SimpleTagEntry(field: "boolValue", dataType: EntryDatatype.BOOLEAN, startTag: "\"boolValue\": " , endTag: ","))
-        stp_array.add(new SimpleTagEntry(field: "timestamp", dataType: EntryDatatype.FLOAT, startTag: "\"timestamp\": "))
-        stp_array.add(new SimpleTagEntry(field: "type", dataType: EntryDatatype.STRING, startTag: "\"type\": \"", endTag: "\","))
-        stp_array.add(new SimpleTagEntry(field: "array", dataType: EntryDatatype.INTEGER, startTag: "\"array\": [", arraySplitTag: ",", endTag: "],"))
+        stp_array.add(new SimpleTagEntry(field: "arrivalTime", dataType: EntryDataType.FLOAT, startTag: "\"arrivalTime\": ", endTag: ","))
+        stp_array.add(new SimpleTagEntry(field: "boolValue", dataType: EntryDataType.BOOLEAN, startTag: "\"boolValue\": " , endTag: ","))
+        stp_array.add(new SimpleTagEntry(field: "timestamp", dataType: EntryDataType.FLOAT, startTag: "\"timestamp\": "))
+        stp_array.add(new SimpleTagEntry(field: "type", dataType: EntryDataType.STRING, startTag: "\"type\": \"", endTag: "\","))
+        stp_array.add(new SimpleTagEntry(field: "array", dataType: EntryDataType.INTEGER, startTag: "\"array\": [", arraySplitTag: ",", endTag: "],"))
         stp_array.each{it.save(flush: true)}
 
-        stp = new SimpleTagParser(selectorName: "arraytest", selectorFileType: AllowedFiletype.JSON,
+        stp = new SimpleTagParser(selectorName: "arraytest", selectorFileType: AllowedFileType.JSON,
                 name: "Jsonparser 3", description: "Tagparser json file with arrays", domainStartTag: "{", domainEndTag: "}")
         stp.entries = new TreeSet(stp_array)
 
@@ -692,14 +686,14 @@ class TestingController {
 
         /////////////////////////////////////////
         ArrayList<SimpleXMLEntry> xml_array = new ArrayList<SimpleXMLEntry>()
-        xml_array.add(new SimpleXMLEntry(field: "address_id", dataType: EntryDatatype.INTEGER))
-        xml_array.add(new SimpleXMLEntry(field: "comment", dataType: EntryDatatype.STRING))
-        xml_array.add(new SimpleXMLEntry(field: "object_nr_internal", dataType: EntryDatatype.STRING))
-        xml_array.add(new SimpleXMLEntry(field: "phone", dataType: EntryDatatype.STRING))
-        xml_array.add(new SimpleXMLEntry(field: "email", dataType: EntryDatatype.STRING))
+        xml_array.add(new SimpleXMLEntry(field: "address_id", dataType: EntryDataType.INTEGER))
+        xml_array.add(new SimpleXMLEntry(field: "comment", dataType: EntryDataType.STRING))
+        xml_array.add(new SimpleXMLEntry(field: "object_nr_internal", dataType: EntryDataType.STRING))
+        xml_array.add(new SimpleXMLEntry(field: "phone", dataType: EntryDataType.STRING))
+        xml_array.add(new SimpleXMLEntry(field: "email", dataType: EntryDataType.STRING))
         xml_array.each{it.save(flush: true)}
 
-        SimpleXMLParser xml = new SimpleXMLParser(selectorName: "TS_Liste", selectorFileType: AllowedFiletype.XML,
+        SimpleXMLParser xml = new SimpleXMLParser(selectorName: "TS_Liste", selectorFileType: AllowedFileType.XML,
                 name: "Jsonparser 3", description: "XML-test-parser", superTag: "ROW")
         xml.entries = new TreeSet(xml_array)
 
@@ -735,16 +729,16 @@ class TestingController {
 
         ////////////////////////////////////////
         xml_array = new ArrayList<SimpleXMLEntry>()
-        xml_array.add(new SimpleXMLEntry(field: "id", dataType: EntryDatatype.INTEGER))
-        xml_array.add(new SimpleXMLEntry(field: "date_created", dataType: EntryDatatype.STRING))
-        xml_array.add(new SimpleXMLEntry(field: "event_name", dataType: EntryDatatype.STRING))
-        xml_array.add(new SimpleXMLEntry(field: "remote_address", dataType: EntryDatatype.STRING))
-        xml_array.add(new SimpleXMLEntry(field: "session_id", dataType: EntryDatatype.STRING))
-        xml_array.add(new SimpleXMLEntry(field: "switched_username", dataType: EntryDatatype.STRING))
-        xml_array.add(new SimpleXMLEntry(field: "username", dataType: EntryDatatype.STRING))
+        xml_array.add(new SimpleXMLEntry(field: "id", dataType: EntryDataType.INTEGER))
+        xml_array.add(new SimpleXMLEntry(field: "date_created", dataType: EntryDataType.STRING))
+        xml_array.add(new SimpleXMLEntry(field: "event_name", dataType: EntryDataType.STRING))
+        xml_array.add(new SimpleXMLEntry(field: "remote_address", dataType: EntryDataType.STRING))
+        xml_array.add(new SimpleXMLEntry(field: "session_id", dataType: EntryDataType.STRING))
+        xml_array.add(new SimpleXMLEntry(field: "switched_username", dataType: EntryDataType.STRING))
+        xml_array.add(new SimpleXMLEntry(field: "username", dataType: EntryDataType.STRING))
         xml_array.each{it.save(flush: true)}
 
-        xml = new SimpleXMLParser(selectorName: "SpringSecurityEvent", selectorFileType: AllowedFiletype.XML,
+        xml = new SimpleXMLParser(selectorName: "SpringSecurityEvent", selectorFileType: AllowedFileType.XML,
                 name: "Jsonparser 4", description: "XML testparser for excel-xml", superTag: "Row", excelTag: "Cell")
         xml.entries = new TreeSet(xml_array)
 

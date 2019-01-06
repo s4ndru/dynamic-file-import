@@ -2,6 +2,8 @@ package transformation;
 
 /**
  * Created by s4ndru on 08/08/2016.
+ *
+ * Gets thrown when definition of some property/field is wrong (e.g. class name given as string but class cannot be found in DB/application)
  */
 public class IncorrectSpecificationException extends Exception{
 

@@ -14,9 +14,4 @@ class SimpleTagEntry extends DynamicParserEntry{
             return (val != null && obj.endTag != null) || val == null
         }
     }
-
-    @Override
-    int compareTo(obj){
-        id.compareTo(obj.id)
-    }
 }

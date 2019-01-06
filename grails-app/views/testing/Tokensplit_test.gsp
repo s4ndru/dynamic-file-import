@@ -18,4 +18,5 @@
             <dfi:createTokenSplitParser />
         </div>
     </body>
+    <g:javascript src="setBootstrapClasses.js" />
 </html>

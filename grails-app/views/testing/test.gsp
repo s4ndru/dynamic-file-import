@@ -18,4 +18,5 @@
             <dfi:fileSelection />
         </div>
     </body>
+    <g:javascript src="setBootstrapClasses.js" />
 </html>

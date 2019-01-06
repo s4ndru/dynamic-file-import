@@ -1,20 +1,21 @@
 package extraction
 
-import testing.TestingController
-
 class ExtractionController {
     StringBuilder errorMessage = new StringBuilder()
 
     def parseFiles(){
 
         File dir = new File((String)params.filesPath)
-        ArrayList<ArrayList<Map<String, Object>>> results = FileParsingService.parseAllFilesInDirectory(dir)
+        String resultMessage
+        Integer httpCode
 
-        render(status: 200)
+        (httpCode, resultMessage) = FileParsingService.parseAllFilesInDirectory(dir)
+
+        render(status: httpCode, text: resultMessage)
     }
 
     def createTokenSplitParser(){
-        if(TokenSplitParser.findBySelectorNameAndSelectorFileType((String)params.selectorName, AllowedFiletype.fromString((String)params.selectorFileType))) {
+        if(TokenSplitParser.findBySelectorNameAndSelectorFileType((String)params.selectorName, AllowedFileType.fromString((String)params.selectorFileType))) {
             render(status: 400, text: "A parser with the same 'filename substring' and 'file type' already exists! Please go back and reconsider the parameters.")
             //redirect(url: request.getHeader('referer'), params: params)
             return
@@ -22,8 +23,9 @@ class ExtractionController {
 
         TokenSplitParser tsp = new TokenSplitParser()
 
-        def selectorFileType = AllowedFiletype.fromString(params.selectorFileType)
+        def selectorFileType = AllowedFileType.fromString(params.selectorFileType)
         params.selectorFileType = null
+        params.id = null
         tsp.properties = params
         tsp.selectorFileType = selectorFileType
 
@@ -37,19 +39,13 @@ class ExtractionController {
         ArrayList<TokenSplitEntry> tse_array = new ArrayList<TokenSplitEntry>()
         i = 0
         while(params["field" + i]) {
-            ArrayList<Integer> indizes = new ArrayList<Integer>()
-            if(params["splitIndizes"+i] != "")
-                params["splitIndizes"+i].split(",").each {indizes.add(Integer.parseInt((String)it))}
-            else
-                indizes.add(i)
-
             tse_array.add(new TokenSplitEntry(
                     field: params["field" + i],
                     multiple: params["multiple" + i] == "on",
                     trim: params["trim" + i] == "on",
                     optional: params["optional" + i] == "on",
-                    dataType: EntryDatatype.fromString((String) params["dataType" + i]),
-                    splitIndizes: indizes
+                    dataType: EntryDataType.fromString((String) params["dataType" + i]),
+                    splitIndex: Integer.parseInt((String)params["splitIndex" + i])
             ))
             i++
         }
@@ -89,7 +85,7 @@ class ExtractionController {
     }
 
     def createColumnWidthParser(){
-        if(ColumnWidthParser.findBySelectorNameAndSelectorFileType((String)params.selectorName, AllowedFiletype.fromString((String)params.selectorFileType))) {
+        if(ColumnWidthParser.findBySelectorNameAndSelectorFileType((String)params.selectorName, AllowedFileType.fromString((String)params.selectorFileType))) {
             response.sendError(400, "Sorry, a parser with the same 'filename substring' and 'file type' is already created! Please go back and reconsider those parameters.")
             //redirect(url: request.getHeader('referer'), params: params)
             return
@@ -97,11 +93,13 @@ class ExtractionController {
 
         ColumnWidthParser cwp = new ColumnWidthParser()
 
-        def selectorFileType = AllowedFiletype.fromString(params.selectorFileType)
+        def selectorFileType = AllowedFileType.fromString(params.selectorFileType)
         params.selectorFileType = null
+        params.id = null
         cwp.properties = params
         cwp.selectorFileType = selectorFileType
 
+        // TODO Doc note => Stops if user has an empty entry in between. Careful!
         HashSet<String> linesToIgnore = new HashSet<String>()
         int i = 0
         while(params["lineToIgnore" + i])
@@ -116,7 +114,7 @@ class ExtractionController {
                     field: params["field" + i],
                     trim: params["trim" + i] == "on",
                     optional: params["optional" + i] == "on",
-                    dataType: EntryDatatype.fromString((String) params["dataType" + i]),
+                    dataType: EntryDataType.fromString((String) params["dataType" + i]),
                     columnStart: params["columnStart" + i],
                     columnEnd: params["columnEnd" + i]
             ))
@@ -158,7 +156,7 @@ class ExtractionController {
     }
 
     def createSimpleXMLParser(){
-        if(SimpleXMLParser.findBySelectorNameAndSelectorFileType((String)params.selectorName, AllowedFiletype.fromString((String)params.selectorFileType))) {
+        if(SimpleXMLParser.findBySelectorNameAndSelectorFileType((String)params.selectorName, AllowedFileType.fromString((String)params.selectorFileType))) {
             render(status: 400, text: "A parser with the same 'filename substring' and 'file type' is already created! Please go back and reconsider those parameters.")
             //redirect(url: request.getHeader('referer'), params: params)
             return
@@ -166,8 +164,9 @@ class ExtractionController {
 
         SimpleXMLParser xmlParser = new SimpleXMLParser()
 
-        def selectorFileType = AllowedFiletype.fromString(params.selectorFileType)
+        def selectorFileType = AllowedFileType.fromString(params.selectorFileType)
         params.selectorFileType = null
+        params.id = null
         xmlParser.properties = params
         xmlParser.selectorFileType = selectorFileType
 
@@ -190,7 +189,7 @@ class ExtractionController {
                     field: params["field" + i],
                     trim: params["trim" + i] == "on",
                     optional: params["optional" + i] == "on",
-                    dataType: EntryDatatype.fromString((String) params["dataType" + i])
+                    dataType: EntryDataType.fromString((String) params["dataType" + i])
             ))
             i++
         }
@@ -230,7 +229,7 @@ class ExtractionController {
     }
 
     def createSimpleTagParser(){
-        if(SimpleTagParser.findBySelectorNameAndSelectorFileType((String)params.selectorName, AllowedFiletype.fromString((String)params.selectorFileType))) {
+        if(SimpleTagParser.findBySelectorNameAndSelectorFileType((String)params.selectorName, AllowedFileType.fromString((String)params.selectorFileType))) {
             render(status: 400, text: "A parser with the same 'filename substring' and 'file type' is already created! Please go back and reconsider those parameters.")
             //redirect(url: request.getHeader('referer'), params: params)
             return
@@ -238,8 +237,9 @@ class ExtractionController {
 
         SimpleTagParser stp = new SimpleTagParser()
 
-        def selectorFileType = AllowedFiletype.fromString(params.selectorFileType)
+        def selectorFileType = AllowedFileType.fromString(params.selectorFileType)
         params.selectorFileType = null
+        params.id = null
         if(params.nestingLevel == "")
             params.nestingLevel = -1
 
@@ -253,7 +253,7 @@ class ExtractionController {
                     field: params["field" + i],
                     trim: params["trim" + i] == "on",
                     optional: params["optional" + i] == "on",
-                    dataType: EntryDatatype.fromString((String) params["dataType" + i]),
+                    dataType: EntryDataType.fromString((String) params["dataType" + i]),
                     startTag: params["startTag" + i],
                     endTag: params["endTag" + i] != "" ? params["endTag" + i] : null,
                     arraySplitTag: params["arraySplitTag" + i] != "" ? params["arraySplitTag" + i] : null

@@ -7,12 +7,7 @@ class ColumnWidthEntry extends DynamicParserEntry{
     Integer columnEnd
 
     static constraints = {
-        columnStart(nullable: false)
-        columnEnd(nullable: false)
-    }
-
-    @Override
-    int compareTo(obj){
-        id.compareTo(obj.id)
+        columnStart(nullable: false, min: 1)
+        columnEnd(nullable: false, min: 1)
     }
 }

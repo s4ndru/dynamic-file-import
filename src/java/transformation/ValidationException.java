@@ -3,7 +3,11 @@ package transformation;
 
 /**
  * Created by Sandr on 15.07.2018.
+ *
+ * Gets thrown if something happens at runtime which is problematic. (e.g. searching the database for a unique object but getting multiple results)
  */
+
+
 public class ValidationException extends Exception{
     public ValidationException() {}
 

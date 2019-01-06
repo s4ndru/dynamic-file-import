@@ -1,13 +1,13 @@
-<g:form class="well">
-    <div id="parser">
-        <div class="form-group">
+<g:form name="formDynamicParser">
+    <div id="divDynamicParser">
+        <div>
             <g:render template="/extraction/parser"/>
         </div>
-        <div class="form-group" id="linesToIgnore">
-            <g:textField class="form-control" name="lineToIgnore0" placeholder="substring to ignore" />
+        <div id="linesToIgnore">
+            <g:textField name="lineToIgnore0" placeholder="substring to ignore" />
         </div>
-        <div class="form-group">
-            <button class="btn btn-warning" type="button" id="addLineToIgnore" >add substring to ignore</button>
+        <div>
+            <button type="button" id="addLineToIgnore" >add substring to ignore</button>
         </div>
     </div>
 
@@ -15,8 +15,8 @@
         <g:render template="/extraction/entries"/>
     </div>
 
-    <g:submitToRemote class="btn btn-primary pull-right" name="submitColumnWidthParser" value="save parser"
-                      action="createColumnWidthParser" onclick="return verifyForm()" onFailure="alert(XMLHttpRequest.responseText)"
+    <g:submitToRemote id="submitColumnWidthParser" name="submitColumnWidthParser" value="save parser" controller="extraction"
+                      action="createColumnWidthParser" onFailure="alert(XMLHttpRequest.responseText)"
                       onSuccess="alert('Parser was successfully saved!'); location.reload();"/>
     <div style="clear: both;"></div>
 </g:form>
@@ -24,39 +24,62 @@
 <g:javascript>
     appendColumnWidthEntry(0);
 
-    // Remove the "optional" checkboxes. Those will not be used for the columnWidthParser, because of the nature of XML.
-    $("#optional0").parent().remove();
+    // Nevermind optional will be used actually. Basically it's possible for number fields to be empty number and the program will try to parse them. With optional enabled no error is thrown.
+    // // Remove the "optional" checkboxes. Those will not be used for the columnWidthParser, because of the nature of the files.
+    // $("#optional0").parent().parent().remove();
+
+    // $('#entryContainer').on('click', '#addEntryBtn', function(){
+    //     $("#optional" + entryCounter).parent().remove()
+    // });
+
+    $('#formDynamicParser').on('mousedown', '#submitColumnWidthParser', verifyForm);
 
     $('#entryContainer').on('click', '#addEntryBtn', function(){
-        $("#optional" + entryCounter).parent().remove()
-    });
+        // // "entryCounter" is a global variable used in the usual "addEntry"-javascript.
+        // // We could just use a newly initialized counter too, because this "onclick" is always called right after the original onclick
+        // appendColumnWidthEntry(entryCounter);
 
-    $('#entryContainer').on('click', '#addEntryBtn', function(){
-        // "entryCounter" is a global variable used in the usual "addEntry"-javascript.
-        // We could just use a newly initialized counter too, because this "onclick" is always called right after the original onclick
-        appendColumnWidthEntry(entryCounter);
+        var CWPEntries = $("#entry" + entryCounter);
+
+        CWPEntries.find("#columnStart0").val("");
+        CWPEntries.find("#columnStart0").attr("name", "columnStart" + entryCounter);
+        CWPEntries.find("#columnStart0").attr("id", "columnStart" + entryCounter);
+
+        CWPEntries.find("#columnEnd0").val("");
+        CWPEntries.find("#columnEnd0").attr("name", "columnEnd" + entryCounter);
+        CWPEntries.find("#columnEnd0").attr("id", "columnEnd" + entryCounter);
+
+        CWPEntries.find("#CWPEntries0").attr("id", "CWPEntries" + entryCounter);
+
+        CWPEntries.find("> label").remove();
+
     });
 
     function appendColumnWidthEntry(index){
-        $("#entry" + index).append('<div class="form-group" style="width: 100%"><input type="number" class="form-control" style="width: 48%" name="columnStart' + index + '" placeholder="Column start" value="" id="columnStart' + index + '" type="text"/> ' +
-                '<input type="number" class="form-control" style="width: 48%" name="columnEnd' + index + '" placeholder="Column end" value="" id="columnEnd' + index + '" type="text"/></div>');
-        //$("#entry" + index).append();
+        $("#entry" + index).append('<div style="width: 100%" id="CWPEntries' + index + '">' +
+        '<input type="number" style="width: 50%" name="columnStart' + index + '" placeholder="Column start" value="" id="columnStart' + index + '"/> ' +
+        '<input type="number" style="width: 50%" name="columnEnd' + index + '" placeholder="Column end" value="" id="columnEnd' + index + '"/>' +
+        '</div>');
 
-        if(index == 0)
+        if(index === 0)
             $("#entry" + index).append('<label>(Eg. 1-5, 5-12, 12-25)</label>');
 
         $("#entry" + index).append('<hr>');
     }
 
     var lineToIgnoreCounter = 0;
-
-    $("#parser").on('click', '#addLineToIgnore', function(){
+    $("#divDynamicParser").on('click', '#addLineToIgnore', function(){
         lineToIgnoreCounter++;
-        $("#linesToIgnore").append('<input class="form-control" name="lineToIgnore' + lineToIgnoreCounter + '" placeholder="substring to ignore" value="" id="lineToIgnore' + lineToIgnoreCounter + '" type="text"> ');
+
+        var new_element = $("#lineToIgnore0").clone(true);
+        new_element.val("");
+        new_element.attr("id", "lineToIgnore" + lineToIgnoreCounter);
+        new_element.attr("name", "lineToIgnore" + lineToIgnoreCounter);
+
+        $("#linesToIgnore").append(new_element);
     });
 
     function verifyForm(){
-
         if($("#name").val() === ""){
             alert("Please fill out the 'Parsername'-field.");
             return false;

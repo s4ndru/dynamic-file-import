@@ -1,11 +1,11 @@
-<g:form class="well">
-    <div id="parser">
-        <div class="form-group">
+<g:form name="formDynamicParser">
+    <div id="divDynamicParser">
+        <div>
             <g:render template="/extraction/parser"/>
-            <g:textField class="form-control" name="superTag" placeholder="Supertag" />
-            <g:textField class="form-control" name="excelTag" placeholder="Exceltag (for excel-xml)" />
-            <g:field type="number" class="form-control" name="startBuffer" placeholder="ignored top supertags" />
-            <g:field type="number" class="form-control" name="endBuffer" placeholder="ignored bottom supertags" />
+            <g:textField name="superTag" placeholder="Supertag" />
+            <g:textField name="excelTag" placeholder="Exceltag (for SpreadsheetML)" />
+            <g:field type="number" name="startBuffer" placeholder="# of ignored top supertags" />
+            <g:field type="number" name="endBuffer" placeholder="# of ignored bottom supertags" />
         </div>
     </div>
 
@@ -13,8 +13,8 @@
         <g:render template="/extraction/entries"/>
     </div>
 
-    <g:submitToRemote class="btn btn-primary pull-right" name="submitSimpleXMLParser" value="save parser"
-                      action="createSimpleXMLParser" onclick="return verifyForm()" onFailure="alert(XMLHttpRequest.responseText)" controller="extraction"
+    <g:submitToRemote id="submitSimpleXMLParser" name="submitSimpleXMLParser" value="save parser"
+                      action="createSimpleXMLParser" onFailure="alert(XMLHttpRequest.responseText)" controller="extraction"
                       onSuccess="alert('Parser was successfully saved!'); location.reload();"/>
     <div style="clear: both;"></div>
 </g:form>
@@ -22,11 +22,13 @@
 <g:javascript>
 
     // Remove the "optional" checkboxes. Those will not be used for the xmlParser, because of the nature of XML.
-    $("#optional0").parent().remove();
+    $("#optional0").parent().parent().remove();
 
-    $('#entryContainer').on('click', '#addEntryBtn', function(){
-        $("#optional" + entryCounter).parent().remove()
-    });
+    $('#formDynamicParser').on('mousedown', '#submitSimpleXMLParser', verifyForm);
+
+    // $('#entryContainer').on('click', '#addEntryBtn', function(){
+    //     $("#optional" + entryCounter).parent().remove()
+    // });
 
     function verifyForm(){
 

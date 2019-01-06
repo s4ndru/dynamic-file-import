@@ -21,4 +21,5 @@
             <dfi:createTransformationRoutine/>
         </div>
     </body>
+    <g:javascript src="setBootstrapClasses.js"/>
 </html>

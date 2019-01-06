@@ -18,4 +18,5 @@
             <dfi:createSimpleXMLParser />
         </div>
     </body>
+    <g:javascript src="setBootstrapClasses.js"/>
 </html>

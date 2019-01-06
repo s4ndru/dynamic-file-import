@@ -1,10 +1,10 @@
-<g:form class="well">
-    <div id="parser">
-        <div class="form-group">
+<g:form name="formDynamicParser">
+    <div id="divDynamicParser">
+        <div>
             <g:render template="/extraction/parser"/>
-            <g:textField class="form-control" name="domainStartTag" placeholder="Domain starttag" />
-            <g:textField class="form-control" name="domainEndTag" placeholder="Domain endtag" />
-            <g:field type="number" class="form-control" name="nestingLevel" placeholder="Nesting level"/>
+            <g:textField name="domainStartTag" placeholder="Domain starttag" />
+            <g:textField name="domainEndTag" placeholder="Domain endtag" />
+            <g:field type="number" name="nestingLevel" placeholder="Nesting level"/>
         </div>
     </div>
 
@@ -12,26 +12,47 @@
         <g:render template="/extraction/entries"/>
     </div>
 
-    <g:submitToRemote class="btn btn-primary pull-right" name="submitSimpleTagParser" value="save parser"
-                      action="createSimpleTagParser" onclick="return verifyForm()" onFailure="alert(XMLHttpRequest.responseText)"
+    <g:submitToRemote id="submitSimpleTagParser" name="submitSimpleTagParser" value="save parser" controller="extraction"
+                      action="createSimpleTagParser" onFailure="alert(XMLHttpRequest.responseText)"
                       onSuccess="alert('Parser was successfully saved!'); location.reload();"/>
     <div style="clear: both;"></div>
 </g:form>
 
 <g:javascript>
     appendSimpleTagEntry(0);
+
+    $('#formDynamicParser').on('mousedown', '#submitSimpleTagParser', verifyForm);
+
     $('#entryContainer').on('click', '#addEntryBtn', function(){
-        // "entryCounter" is a global variable used in the usual "addEntry"-javascript.
-        // We could just use a newly initialized counter too, because this "onclick" is always called right after the original onclick
-        appendSimpleTagEntry(entryCounter);
+        // // "entryCounter" is a global variable used in the usual "addEntry"-javascript.
+        // // We could just use a newly initialized counter too, because this "onclick" is always called right after the original onclick
+        // appendSimpleTagEntry(entryCounter);
+
+        var STPEntries = $("#entry" + entryCounter);
+
+        STPEntries.find("#STPEntries0").attr("id", "STPEntries" + entryCounter);
+
+        STPEntries.find("#startTag0").val("");
+        STPEntries.find("#startTag0").attr("name", "startTag" + entryCounter);
+        STPEntries.find("#startTag0").attr("id", "startTag" + entryCounter);
+
+        STPEntries.find("#endTag0").val("");
+        STPEntries.find("#endTag0").attr("name", "endTag" + entryCounter);
+        STPEntries.find("#endTag0").attr("id", "endTag" + entryCounter);
+
+        STPEntries.find("#arraySplitTag0").val("");
+        STPEntries.find("#arraySplitTag0").attr("name", "arraySplitTag" + entryCounter);
+        STPEntries.find("#arraySplitTag0").attr("id", "arraySplitTag" + entryCounter);
+
     });
 
     function appendSimpleTagEntry(index){
-        $("#entry" + index).append('<input class="form-control" name="startTag' + index + '" placeholder="Starttag" value="" id="startTag' + index + '" type="text"> ');
-        $("#entry" + index).append('<input class="form-control" name="endTag' + index + '" placeholder="Endtag" value="" id="endTag' + index + '" type="text"> ');
-        $("#entry" + index).append('<input class="form-control" name="arraySplitTag' + index + '" placeholder="Array splitting tag" value="" id="arraySplitTag' + index + '" type="text"> ');
-
-        $("#entry" + index).append('<hr>');
+        $("#entry" + index).append('<div style="width: 100%" id="STPEntries' + index + '"> ' +
+        '<input name="startTag' + index + '" placeholder="Starttag" value="" id="startTag' + index + '" type="text"> ' +
+        '<input name="endTag' + index + '" placeholder="Endtag" value="" id="endTag' + index + '" type="text">' +
+        '<input name="arraySplitTag' + index + '" placeholder="Array splitting tag" value="" id="arraySplitTag' + index + '" type="text"> ' +
+        '</div>' +
+        '<hr>');
     }
 
     function verifyForm(){
@@ -83,6 +104,12 @@
                 return false;
             }
 
+            for(var j = i + 1; j <= entryCounter; j++) {
+                if($("#startTag" + j).val().includes($("#startTag" + i).val())) {
+                    alert("Simpler start-tag appeared in entry-list that will match tags which are matched by a later defined and more complex start-tag!");
+                    return false;
+                }
+            }
         }
 
         return true;

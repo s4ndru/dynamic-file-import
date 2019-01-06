@@ -19,7 +19,7 @@ class SimpleTagParser extends DynamicParser{
     }
 
     @Override
-    ArrayList<Map<String, String>> parse(File file) throws ParserUnfitException, ParserInconsistentException {
+    ArrayList<Map<String, Object>> parse(File file) throws ParserUnfitException, ParserInconsistentException {
 
         ArrayList entries = entries.asList()
         def input = file
@@ -30,30 +30,28 @@ class SimpleTagParser extends DynamicParser{
         Map<DynamicParserEntry, Pattern> patternsNoEndTag = [:]
         Map<DynamicParserEntry, Pattern> patternArray = [:]
         Matcher m, m_Multi
-        Map<DynamicParserEntry, Boolean> isEntryParsedMap = [:]
         int nestedCounter = 0
-        int nestedLevel = nestingLevel
+        int nestingLevelTemp = nestingLevel
         DynamicParserEntry multilineEntry = null
         StringBuilder multilineConcat = null
         Boolean singleLineFile = false
         int maxSize = 0
-        ArrayList arrayObject = null
+        StringBuilder arrayStringBuilder = null
         DynamicParserEntry arrayEntry = null
 
 
-        // TODO: test a file where tags contain other tags, but still valid
         for(int i = 0; i < entries.size(); i++)
             for(int j = i + 1; j < entries.size(); j++)
                 if(entries[j].startTag.contains(entries[i].startTag))
-                    throw new ParserInconsistentException("Simpler Starttag appeared, which covers later tags!")
+                    throw new ParserInconsistentException("Simpler start-tag appeared in entry-list that will match tags which are matched by a later defined and more complex start-tag!")
 
 
-        if(file.readLines().size() == 1 && selectorFileType == AllowedFiletype.JSON)
+        if(file.readLines().size() == 1 && selectorFileType == AllowedFileType.JSON)
             input = new JSONObject(file.readLines()[0]).toString(2)
-        else if(file.readLines().size() == 1 && selectorFileType != AllowedFiletype.JSON) {
+        else if(file.readLines().size() == 1 && selectorFileType != AllowedFileType.JSON) {
             if (entries.endTag.contains(null) && entries.size() > 1)
                 throw new ParserInconsistentException("We have a file which only has a single line and the parser is defined with more than one entry, " +
-                        "but we have entries with no endTag!")
+                        "but there are entries with no endTag!")
 
             singleLineFile = true
         }
@@ -62,18 +60,16 @@ class SimpleTagParser extends DynamicParser{
         entries.each{
             // This is the simplest one, but requires that each tag has its own line
             if(it.endTag == null && it.arraySplitTag == null)
-                patterns.put(it, Pattern.compile("(\\Q" + it.startTag + "\\E)(.*)"))
+                patterns.put((DynamicParserEntry)it, Pattern.compile("\\Q" + it.startTag + "\\E(.*)"))
             else if(it.arraySplitTag != null){
-                patternArray.put(it, Pattern.compile("(\\Q" + it.startTag + "\\E)(.*?)(\\Q" + it.endTag + "\\E)"))
+                patternArray.put((DynamicParserEntry)it, Pattern.compile("\\Q" + it.startTag + "\\E(.*?)\\Q" + it.endTag + "\\E"))
             }
             else{
-                patterns.put(it, Pattern.compile("(\\Q" + it.startTag + "\\E)(.*?)(\\Q" + it.endTag + "\\E)"))
+                patterns.put((DynamicParserEntry)it, Pattern.compile("\\Q" + it.startTag + "\\E(.*?)\\Q" + it.endTag + "\\E"))
 
                 // In case we have a multiline tag
-                patternsNoEndTag.put(it, Pattern.compile("(\\Q" + it.startTag + "\\E)(.*)"))
+                patternsNoEndTag.put((DynamicParserEntry)it, Pattern.compile("\\Q" + it.startTag + "\\E(.*)"))
             }
-
-            isEntryParsedMap.put(it, false)
         }
 
         input.eachLine { line, line_index ->
@@ -81,76 +77,129 @@ class SimpleTagParser extends DynamicParser{
             // only concatenate the line and, if we found the end, set the "flag" back to null
             if(multilineEntry != null){
 
-                if(line.contains(domainEndTag) || line.contains(multilineEntry.endTag)){
-                    if(line.contains(domainEndTag))
-                        multilineConcat.append(line.subSequence(0, (int)line.indexOf(domainEndTag)))
-                    else if(line.contains(multilineEntry.endTag))
-                        multilineConcat.append(((String)line).subSequence(0, (int)line.indexOf(multilineEntry.endTag)))
+                if((domainEndTag != null && line.contains(domainEndTag)) || line.contains(multilineEntry.endTag)){
+					if(line.contains(multilineEntry.endTag))
+						multilineConcat.append(line.subSequence(0, (int)line.indexOf(multilineEntry.endTag)).trim())
+					else if(domainEndTag != null && line.contains(domainEndTag))
+						multilineConcat.append(line.subSequence(0, (int)line.indexOf(domainEndTag)).trim())
 
-                    String multilineResult = multilineConcat.toString().replace("\t", "")
+					if(domainStartTag == null && objectMap.get(multilineEntry.field) != null){
+						if(objectMap.size() != entries.size()){
+							entries.each {
+								if(!it.optional)
+									throw new ParserUnfitException("Required entry for object does not appear in the file above line: " + line_index + "!")
+							}
+						}
+						allObjects.add(objectMap)
+						objectMap = [:]
+
+						if(nestingLevel == -1)
+							nestingLevelTemp = -1
+					}
+
+                    String multilineResult = multilineConcat.toString()
                     objectMap.put(multilineEntry.field, multilineResult)
                     multilineEntry = null
+
+					if(nestingLevelTemp == -1)
+						nestingLevelTemp = nestedCounter
                 }
                 else{
-                    multilineConcat.append(line)
-                    return
+                    multilineConcat.append(line.trim())
                 }
+
+                return
             }
             else if(arrayEntry != null){
                 // No need to look here for a domainEnd because there always has to be a endTag for the array
                 String matchedLine
                 if(line.contains(arrayEntry.endTag)){
-                    matchedLine = line.replace(arrayEntry.endTag, "").trim()
+                    matchedLine = line.replaceAll("(.*)" + Pattern.quote(arrayEntry.endTag), "\$1").trim()
+
+					if(domainStartTag == null && objectMap.get(arrayEntry.field) != null){
+						if(objectMap.size() != entries.size()){
+							entries.each {
+								if(!it.optional)
+									throw new ParserUnfitException("Required entry for object does not appear in the file above line: " + line_index + "!")
+							}
+						}
+						allObjects.add(objectMap)
+						objectMap = [:]
+
+						if(nestingLevel == -1)
+							nestingLevelTemp = -1
+					}
+
                     try {
                         if(!matchedLine.isEmpty())
                             arrayEntry.checkType(matchedLine)
                     }
                     catch (ParserUnfitException e) {
-                        throw new ParserUnfitException(e.message + "parsed by SimpleTagParser: " + this.name, e.cause)
+						if(checkIfStrictParsingNeeded(this.routines, matchedLine))
+							throw new ParserUnfitException(e.message + " parsed by SimpleTagParser: " + this.name, e.cause)
                     }
+
                     if(!matchedLine.isEmpty())
-                        arrayObject.add(arrayEntry.parseField(matchedLine))
-                    objectMap.put(arrayEntry.field, arrayObject)
-                    arrayObject = null
+						arrayStringBuilder.append("|" + matchedLine)
+
+                    objectMap.put(arrayEntry.field, arrayStringBuilder.toString())
+                    arrayStringBuilder = null
                     arrayEntry = null
+
+					if(nestingLevelTemp == -1)
+						nestingLevelTemp = nestedCounter
                 }
                 else{
-                    matchedLine = line.replace(arrayEntry.arraySplitTag, "").trim()
+                    matchedLine = line.replaceAll("(.*)" + arrayEntry.arraySplitTag, "\$1").trim()
                     try {
                         arrayEntry.checkType(matchedLine)
                     }
                     catch (ParserUnfitException e) {
-                        throw new ParserUnfitException(e.message + "parsed by SimpleTagParser: " + this.name, e.cause)
+						if(checkIfStrictParsingNeeded(this.routines, matchedLine))
+							throw new ParserUnfitException(e.message + " parsed by SimpleTagParser: " + this.name, e.cause)
                     }
-                    arrayObject.add(arrayEntry.parseField(matchedLine))
+
+					if(arrayStringBuilder.toString().isEmpty())
+						arrayStringBuilder.append(matchedLine)
+					else
+						arrayStringBuilder.append("|" + matchedLine)
                 }
+
                 return
             }
-
 
             // Count if a "domain" starts or ends.
             // Objectmap will be created when we found defined tag and the domainEnd is reached
             if(!singleLineFile && domainStartTag != null && line.contains(domainStartTag))
                 nestedCounter++
             else if(!singleLineFile && domainEndTag != null && line.contains(domainEndTag)) {
-                if(nestedLevel == nestedCounter && objectMap.size() != 0) {
+				if(nestingLevelTemp == nestedCounter && objectMap.size() != 0) {
+					if(objectMap.size() != entries.size()){
+						entries.each {
+							if(!it.optional)
+								throw new ParserUnfitException("Required entry '" + it.field + "' for object does not appear in the file above line: " + line_index + "!")
+						}
+					}
+
                     allObjects.add(objectMap)
                     objectMap = [:]
+
                     if(nestingLevel == -1)
-                        nestedLevel = -1
+                        nestingLevelTemp = -1
                 }
-                else if(nestedLevel > nestedCounter && objectMap.size() != 0)
-                    throw new ParserInconsistentException("Parser is below the defined 'nested level'. This happens if there is a subdomain in the beginning of the domain and the user specified no domainlevel. Or if the user specified a nestedLevel higher than it actually is.")
+                else if(nestingLevelTemp > nestedCounter && objectMap.size() != 0)
+                    throw new ParserInconsistentException("Parser is below the defined 'nested level'. This happens if there is a 'sub-domain' in the beginning of the domain and the user specified no 'nesting-level'. Or if the user specified a 'nesting-level' higher than it actually is.")
 
                 nestedCounter--
 
                 return
             }
 
-            entries.each{ entry_it ->
+            for(int entry_index = 0; entry_index < this.entries.size(); entry_index++){
+                def entry_it = entries.get(entry_index)
 
-                if(multilineEntry != null)
-                    return
+//                if(multilineEntry != null)
+//                    break
 
                 if(entry_it.arraySplitTag != null)
                     m = patternArray.get(entry_it).matcher((String)line)
@@ -164,120 +213,161 @@ class SimpleTagParser extends DynamicParser{
                 if(!singleLineFile){
                     // Found regex match and it's not an array, else go to array procedure
                     if(entry_it.arraySplitTag == null && m.find()) {
-                        String matchedLine = m.group(2).trim()
+                        String matchedLine = m.group(1).trim()
 
-                        // Checks if an entry for a object is already parsed. Which means it is finished, as a new one starts now.
-                        // This makes only sense, if "domain tags" are not set.
-                        // THIS IS ALSO RISKY, USER SHOULD KNOW WHAT HE DOES. See documentation for more info.
-                        if(domainStartTag == null && isEntryParsedMap.get(entry_it)){
+                        // Checks if an entry for a object is already parsed, which means it is finished, as a new one starts now.
+                        // This only makes sense if "domain tags" are not set.
+                        // This is a somewhat risky feature and should only be used when certain that each pseudo-object in a file has all defined key/value pairs.
+                        if(domainStartTag == null && objectMap.get(entry_it.field) != null){
                             if(objectMap.size() != entries.size()){
                                 entries.each {
-                                    if(!it.optional && objectMap.get(it.field) == null)
-                                        throw new ParserUnfitException("Required entry for object does not appear in the file above line: " + line_index + "!")
+                                    if(!it.optional)
+                                        throw new ParserUnfitException("Required entry '" + it.field + "' for object does not appear in the file above line: " + line_index + "!")
                                 }
                             }
-
                             allObjects.add(objectMap)
                             objectMap = [:]
 
-                            entries.each{
-                                isEntryParsedMap.put(it, false)
-                            }
+							if(nestingLevel == -1)
+								nestingLevelTemp = -1
                         }
-
-                        if(domainStartTag == null)
-                            isEntryParsedMap.put(entry_it, true)
 
                         try {
                             entry_it.checkType(matchedLine)
                         }
                         catch (ParserUnfitException e) {
-                            throw new ParserUnfitException(e.message + "parsed by SimpleTagParser: " + this.name, e.cause)
+							if(checkIfStrictParsingNeeded(this.routines, matchedLine))
+                                throw new ParserUnfitException(e.message + " parsed by SimpleTagParser: " + this.name, e.cause)
                         }
 
                         objectMap.put(entry_it.field, entry_it.parseField(matchedLine))
-                        if(nestedLevel == -1)
-                            nestedLevel = nestedCounter
+
+                        if(nestingLevelTemp == -1)
+                            nestingLevelTemp = nestedCounter
+
+                        break
                     }
                     else if(entry_it.arraySplitTag == null && entry_it.endTag != null && m_Multi.find()){
 
-                        // Problem here, in case we do not have string but end is reached without a endtag. E.g. in Json no endtag because domainend is reached.
-                        if(entry_it.dataType != EntryDatatype.STRING)
-                            throw new ParserUnfitException("A multiline tag was detected, but the corresponding entry indicates a non-string datatype, which is not allowed!")
+                        // Problem here, in case we do not have string but end is reached without a endTag. E.g. in Json no endTag because domainEnd is reached.
+                        if(entry_it.dataType != EntryDataType.STRING)
+                            throw new ParserUnfitException("A multi-line spanning value was detected, but the corresponding entry indicates a non-string data type, which is not allowed!")
+
+						if(nestingLevelTemp == -1)
+							nestingLevelTemp = nestedCounter
 
                         // We found a multilineTag, if the user specified correctly. Now read and concatenate until endtag reached.
                         multilineEntry = entry_it
                         multilineConcat = new StringBuilder("")
-                        multilineConcat.append(m_Multi.group(2))
-                        return
+                        multilineConcat.append(m_Multi.group(1))
+                        break
                     }
-                    // Not a single line array
                     else if(entry_it.arraySplitTag != null){
                         if(line.contains(entry_it.startTag) && line.contains(entry_it.endTag)) {
                             if (m.find()) {
-                                String matchedLine = m.group(2).trim()
-                                arrayObject = new ArrayList<Object>()
+                                String matchedLine = m.group(1).trim()
+
+								if(domainStartTag == null && objectMap.get(entry_it.field) != null){
+									if(objectMap.size() != entries.size()){
+										entries.each {
+											if(!it.optional)
+												throw new ParserUnfitException("Required entry '" + it.field + "' for object does not appear in the file above line: " + line_index + "!")
+										}
+									}
+									allObjects.add(objectMap)
+									objectMap = [:]
+
+									if(nestingLevel == -1)
+										nestingLevelTemp = -1
+								}
+
+                                arrayStringBuilder = new StringBuilder()
                                 matchedLine.split(entry_it.arraySplitTag).each {
                                     try {
                                         entry_it.checkType(it)
                                     }
                                     catch (ParserUnfitException e) {
-                                        throw new ParserUnfitException(e.message + "parsed by SimpleTagParser: " + this.name, e.cause)
+										if(checkIfStrictParsingNeeded(this.routines, it))
+											throw new ParserUnfitException(e.message + " parsed by SimpleTagParser: " + this.name, e.cause)
                                     }
-                                    arrayObject.add(entry_it.parseField(it))
+
+									if(arrayStringBuilder.toString().isEmpty())
+										arrayStringBuilder.append(matchedLine)
+									else
+										arrayStringBuilder.append("|" + matchedLine)
+
                                 }
-                                objectMap.put(entry_it.field, arrayObject)
-                                arrayObject = null
+                                objectMap.put(entry_it.field, arrayStringBuilder.toString())
+								arrayStringBuilder = null
+
+								if(nestingLevelTemp == -1)
+									nestingLevelTemp = nestedCounter
+
+                                break
                             }
                         }
+						// Not a single line array
                         else if(line.contains(entry_it.startTag)) {
-                            arrayObject = new ArrayList<Object>()
+							arrayStringBuilder = new StringBuilder()
                             arrayEntry = entry_it
 
-                            String matchedLine = line.replace(entry_it.startTag, "").replace(entry_it.arraySplitTag, "").trim()
+                            String matchedLine = line.replaceAll(Pattern.quote(entry_it.startTag) + "(.*)", "\$1")
+									.replaceAll("(.*)" + Pattern.quote(entry_it.arraySplitTag), "\$1").trim()
 
                             try {
                                 if(!matchedLine.isEmpty())
                                     entry_it.checkType(matchedLine)
                             }
                             catch (ParserUnfitException e) {
-                                throw new ParserUnfitException(e.message + "parsed by SimpleTagParser: " + this.name, e.cause)
+								if(checkIfStrictParsingNeeded(this.routines, matchedLine))
+									throw new ParserUnfitException(e.message + " parsed by SimpleTagParser: " + this.name, e.cause)
                             }
 
-                            if(!matchedLine.isEmpty())
-                                arrayObject.add(entry_it.parseField(matchedLine))
+                            if(!matchedLine.isEmpty()){
+								arrayStringBuilder.append(matchedLine)
+							}
+
+                            break
                         }
                     }
                 }
                 else{
                     for(int i = 0; m.find(); i++){
-                        String matchedLine = m.group(2).trim()
+                        String matchedLine = m.group(1).trim()
 
                         if(i == maxSize){
                             allObjects.add([:])
                         }
 
                         if(entry_it.arraySplitTag != null){
-                            arrayObject = new ArrayList<Object>()
+							arrayStringBuilder = new StringBuilder()
                             matchedLine.split(entry_it.arraySplitTag).each{
                                 try {
                                     entry_it.checkType(matchedLine)
                                 }
                                 catch (ParserUnfitException e) {
-                                    throw new ParserUnfitException(e.message + "parsed by SimpleTagParser: " + this.name, e.cause)
+									if(checkIfStrictParsingNeeded(this.routines, matchedLine))
+										throw new ParserUnfitException(e.message + " parsed by SimpleTagParser: " + this.name, e.cause)
                                 }
-                                arrayObject.add(entry_it.parseField(it))
+
+								if(arrayStringBuilder.toString().isEmpty())
+									arrayStringBuilder.append(matchedLine)
+								else
+									arrayStringBuilder.append(", " + matchedLine)
+
                             }
-                            allObjects[i].put(entry_it.field, arrayObject)
-                            arrayObject = null
+                            allObjects[i].put(entry_it.field, arrayStringBuilder.toString())
+							arrayStringBuilder = null
                         }
                         else{
                             try {
                                 entry_it.checkType(matchedLine)
                             }
                             catch (ParserUnfitException e) {
-                                throw new ParserUnfitException(e.message + "parsed by SimpleTagParser: " + this.name, e.cause)
+								if(checkIfStrictParsingNeeded(this.routines, matchedLine))
+									throw new ParserUnfitException(e.message + " parsed by SimpleTagParser: " + this.name, e.cause)
                             }
+
                             allObjects[i].put(entry_it.field, entry_it.parseField(matchedLine))
                         }
 
@@ -293,9 +383,8 @@ class SimpleTagParser extends DynamicParser{
                 allObjects.add(objectMap)
                 objectMap = [:]
 
-                entries.each{
-                    isEntryParsedMap.put(it, false)
-                }
+				if(nestingLevel == -1)
+					nestingLevelTemp = -1
             }
         }
 
@@ -303,7 +392,7 @@ class SimpleTagParser extends DynamicParser{
             if(objectMap.size() != entries.size()) {
                 entries.each {
                     if (!it.optional && objectMap.get(it.field) == null)
-                        throw new ParserUnfitException("Required entry for object does not appear near the end of the file!")
+                        throw new ParserUnfitException("Required entry '" + it.field + "' for object does not appear near the end of the file!")
                 }
             }
 
