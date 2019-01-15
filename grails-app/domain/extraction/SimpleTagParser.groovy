@@ -77,16 +77,23 @@ class SimpleTagParser extends DynamicParser{
             // only concatenate the line and, if we found the end, set the "flag" back to null
             if(multilineEntry != null){
 
-                if((domainEndTag != null && line.contains(domainEndTag)) || line.contains(multilineEntry.endTag)){
-					if(line.contains(multilineEntry.endTag))
-						multilineConcat.append(line.subSequence(0, (int)line.indexOf(multilineEntry.endTag)).trim())
-					else if(domainEndTag != null && line.contains(domainEndTag))
-						multilineConcat.append(line.subSequence(0, (int)line.indexOf(domainEndTag)).trim())
+                if((domainEndTag != null && (line.contains(domainEndTag)) || line.contains(multilineEntry.endTag))) {
+					String extractedVal
+
+					if (domainEndTag != null && line.contains(domainEndTag))
+						extractedVal = line.subSequence(0, (int)line.indexOf(domainEndTag)).trim()
+					else
+						extractedVal = line.subSequence(0, (int)line.indexOf(multilineEntry.endTag)).trim()
+
+					if(!extractedVal.isEmpty() && multilineEntry.dataType != EntryDataType.STRING)
+						throw new ParserUnfitException("A multi-line spanning value was detected, but the corresponding entry indicates a non-string data type, which is not allowed!")
+
+					multilineConcat.append(extractedVal)
 
 					if(domainStartTag == null && objectMap.get(multilineEntry.field) != null){
 						if(objectMap.size() != entries.size()){
 							entries.each {
-								if(!it.optional)
+								if(!it.optional && objectMap.get(it.field) == null)
 									throw new ParserUnfitException("Required entry for object does not appear in the file above line: " + line_index + "!")
 							}
 						}
@@ -105,10 +112,13 @@ class SimpleTagParser extends DynamicParser{
 						nestingLevelTemp = nestedCounter
                 }
                 else{
-                    multilineConcat.append(line.trim())
-                }
+					// If the entry spans over multiple lines and is not a string, then problem! If a number but near domain end, no problem.
+					if(multilineEntry.dataType != EntryDataType.STRING)
+						throw new ParserUnfitException("A multi-line spanning value was detected, but the corresponding entry indicates a non-string data type, which is not allowed!")
 
-                return
+                    multilineConcat.append(line.trim())
+					return
+                }
             }
             else if(arrayEntry != null){
                 // No need to look here for a domainEnd because there always has to be a endTag for the array
@@ -119,7 +129,7 @@ class SimpleTagParser extends DynamicParser{
 					if(domainStartTag == null && objectMap.get(arrayEntry.field) != null){
 						if(objectMap.size() != entries.size()){
 							entries.each {
-								if(!it.optional)
+								if(!it.optional && objectMap.get(it.field) == null)
 									throw new ParserUnfitException("Required entry for object does not appear in the file above line: " + line_index + "!")
 							}
 						}
@@ -176,7 +186,7 @@ class SimpleTagParser extends DynamicParser{
 				if(nestingLevelTemp == nestedCounter && objectMap.size() != 0) {
 					if(objectMap.size() != entries.size()){
 						entries.each {
-							if(!it.optional)
+							if(!it.optional && objectMap.get(it.field) == null)
 								throw new ParserUnfitException("Required entry '" + it.field + "' for object does not appear in the file above line: " + line_index + "!")
 						}
 					}
@@ -221,7 +231,7 @@ class SimpleTagParser extends DynamicParser{
                         if(domainStartTag == null && objectMap.get(entry_it.field) != null){
                             if(objectMap.size() != entries.size()){
                                 entries.each {
-                                    if(!it.optional)
+                                    if(!it.optional && objectMap.get(it.field) == null)
                                         throw new ParserUnfitException("Required entry '" + it.field + "' for object does not appear in the file above line: " + line_index + "!")
                                 }
                             }
@@ -247,16 +257,12 @@ class SimpleTagParser extends DynamicParser{
 
                         break
                     }
-                    else if(entry_it.arraySplitTag == null && entry_it.endTag != null && m_Multi.find()){
-
-                        // Problem here, in case we do not have string but end is reached without a endTag. E.g. in Json no endTag because domainEnd is reached.
-                        if(entry_it.dataType != EntryDataType.STRING)
-                            throw new ParserUnfitException("A multi-line spanning value was detected, but the corresponding entry indicates a non-string data type, which is not allowed!")
+                    else if(entry_it.arraySplitTag == null && (entry_it.endTag != null || domainEndTag != null) && m_Multi.find()){
 
 						if(nestingLevelTemp == -1)
 							nestingLevelTemp = nestedCounter
 
-                        // We found a multilineTag, if the user specified correctly. Now read and concatenate until endtag reached.
+                        // We found a multilineTag, if the user specified correctly. Now read and concatenate until endtag or domain endtag reached.
                         multilineEntry = entry_it
                         multilineConcat = new StringBuilder("")
                         multilineConcat.append(m_Multi.group(1))
@@ -270,7 +276,7 @@ class SimpleTagParser extends DynamicParser{
 								if(domainStartTag == null && objectMap.get(entry_it.field) != null){
 									if(objectMap.size() != entries.size()){
 										entries.each {
-											if(!it.optional)
+											if(!it.optional && objectMap.get(it.field) == null)
 												throw new ParserUnfitException("Required entry '" + it.field + "' for object does not appear in the file above line: " + line_index + "!")
 										}
 									}
@@ -292,9 +298,9 @@ class SimpleTagParser extends DynamicParser{
                                     }
 
 									if(arrayStringBuilder.toString().isEmpty())
-										arrayStringBuilder.append(matchedLine)
+										arrayStringBuilder.append(it)
 									else
-										arrayStringBuilder.append("|" + matchedLine)
+										arrayStringBuilder.append("|" + it)
 
                                 }
                                 objectMap.put(entry_it.field, arrayStringBuilder.toString())
@@ -351,9 +357,9 @@ class SimpleTagParser extends DynamicParser{
                                 }
 
 								if(arrayStringBuilder.toString().isEmpty())
-									arrayStringBuilder.append(matchedLine)
+									arrayStringBuilder.append(it)
 								else
-									arrayStringBuilder.append(", " + matchedLine)
+									arrayStringBuilder.append(", " + it)
 
                             }
                             allObjects[i].put(entry_it.field, arrayStringBuilder.toString())
@@ -371,14 +377,13 @@ class SimpleTagParser extends DynamicParser{
                             allObjects[i].put(entry_it.field, entry_it.parseField(matchedLine))
                         }
 
-
                         if(maxSize <= i)
                             maxSize = i + 1
                     }
                 }
             }
 
-            // If we have no "domain" specified, it means we have a full object if our "objectMap" has as many entries as there are parserentries.
+            // If we have no "domain" specified, it means we have a full object if our "objectMap" has as many entries as there are parser entries.
             if(multilineEntry == null && !singleLineFile && domainStartTag == null && objectMap.size() == entries.size()){
                 allObjects.add(objectMap)
                 objectMap = [:]

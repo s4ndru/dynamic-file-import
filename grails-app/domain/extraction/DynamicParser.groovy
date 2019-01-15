@@ -2,7 +2,6 @@ package extraction
 
 import transformation.*
 
-
 abstract class DynamicParser {
 
 	String name
@@ -16,15 +15,31 @@ abstract class DynamicParser {
 	static hasMany = [entries: DynamicParserEntry, routines: TransformationRoutine]
 
 	static constraints = {
+		// String field of each entry has to be unique
 		entries( validator: { entries ->
-			entries.every() { entry -> entries.field.findAll{ entry.field == it }.size() == 1 }
+			entries.every() { entry -> entries.field.findAll{ entry.field == it }.size() == 1}
+		})
+
+		// No two parsers are responsible for the same file identification.
+		// e.g. There cannot be a parser that parses files called "A_File.txt"
+		// and another one parsing files called "A_File_TWO.txt"
+		selectorName( validator: { selectorName, obj ->
+			boolean isNoFileCollision = true
+
+			((List<DynamicParser>)getAll()).each{
+				if((it.selectorName.contains(selectorName) || selectorName.contains(it.selectorName))
+						&& obj.selectorFileType.toString() == it.selectorFileType.toString())
+					isNoFileCollision = false
+			}
+
+			return isNoFileCollision
 		})
 	}
 
 	abstract ArrayList<Map<String, Object>> parse(File file) throws ParserUnfitException, ParserInconsistentException
 
 	boolean appliesTo(File file){
-		return file.name.contains(selectorFileType.toString()) && file.name.contains(selectorName)
+		return file.name.toLowerCase().contains(selectorFileType.toString()) && file.name.contains(selectorName)
 	}
 
 	static boolean checkIfStrictParsingNeeded(SortedSet<TransformationRoutine> routines, String line){

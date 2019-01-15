@@ -2,9 +2,9 @@
     <div id="divDynamicParser">
         <div>
             <g:render template="/extraction/parser"/>
-            <g:textField name="domainStartTag" placeholder="Domain starttag" />
-            <g:textField name="domainEndTag" placeholder="Domain endtag" />
-            <g:field type="number" name="nestingLevel" placeholder="Nesting level"/>
+            <g:textField name="domainStartTag" placeholder="Domain start tag" />
+            <g:textField name="domainEndTag" placeholder="Domain end tag" />
+            <g:field type="number" name="nestingLevel" placeholder="Nesting level (starts at 0, increments per domain start tag)"/>
         </div>
     </div>
 

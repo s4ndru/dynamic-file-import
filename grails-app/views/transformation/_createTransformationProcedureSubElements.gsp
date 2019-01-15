@@ -1,4 +1,4 @@
-<%@ page import="transformation.MethodInfo" %>
+<%@ page import="transformation.TransformationController; transformation.MethodInfo" %>
 <div>
     <g:field name="order_id" type="number" min="0" required="required" placeholder="Sequence number"/>
 </div>
@@ -61,26 +61,41 @@
                             </g:if>
                             <g:elseif test="${MethodInfo.isDatumOnWrapperAndTuplePosition((String)params.method, i, 0)}">
                                 <g:select name="parameter_key${i}_0" id="parameter_key${i}_0" from="${params.entries}" style="width: 48%"
-                                          noSelection="[null : 'Please select a datum...']" placeholder="parameterkey" />
+                                          noSelection="[null : 'Please select a datum...']" placeholder="parameterkey"
+                                          onchange="if(this.value == '${TransformationController.arithmeticPlaceholder}'){
+                                          var belongs_to = ${params.belongs_to}; var right_value = \$('#parameter_value1_0').val(); ${remoteFunction(action: 'setArithmeticParameters', update: "parameter_properties1",
+                                          params: '\'right_value=\' + right_value + \'&left_value=\' + this.value + \'&belongs_to=\' + belongs_to')}}"/>
                             </g:elseif>
                             <g:else>
                                 <g:textField name="parameter_key${i}_0" id="parameter_key${i}_0" placeholder="parameterkey" style="width: 48%" />
                             </g:else>
 
-                            %{-- If a method has a parameter with a class name, then it can be assumed that is on the first wrapper and the right value--}%
-                            <g:if test="${MethodInfo.getSecondClassPropertiesPosition(params.method) != null && i == 0}">
+                            %{-- Following two ifs are special cases --}%
+                            <g:if test="${params.method == "unaryArithmeticOperation" && i == 0}">
+                                <g:select name="parameter_value${i}_0" id="parameter_value${i}_0" from="${MethodInfo.getUnaryArithmeticOperators()}" style="width: 48%"
+                                          noSelection="[null : 'Please select a operation..']" />
+                            </g:if>
+                            <g:elseif test="${params.method == "arithmeticOperation" && i == 0}">
+                                <g:select name="parameter_value${i}_0" id="parameter_value${i}_0" from="${MethodInfo.getArithmeticOperators()}" style="width: 48%"
+                                          noSelection="[null : 'Please select a operation..']" />
+                            </g:elseif>
+                            %{-- If a method has a parameter with a class name (which is implied if the function doesn't return null), then it can be assumed that is on the first wrapper and the right value --}%
+                            <g:elseif test="${MethodInfo.getSecondClassPropertiesPosition(params.method) != null && i == 0}">
                                 <g:select name="parameter_value${i}_0" id="parameter_value${i}_0" from="${params.domainList}" style="width: 48%"
                                           noSelection="[null : 'Please select a class..']" onchange="var method = '${params.method}';var index = ${i + 1}; var belongs_to = ${params.belongs_to};
                                           ${remoteFunction(action: 'setSecondClassProperties', update: "parameter_properties${i + 1}",
                                           params: '\'selectedClass=\' + this.value + \'&method=\' + method + \'&index=\' + index + \'&belongs_to=\' + belongs_to')}"/>
-                            </g:if>
+                            </g:elseif>
                             <g:elseif test="${MethodInfo.isObjectOnWrapperAndTuplePosition((String)params.method, i, 1)}">
                                 <g:select name="parameter_value${i}_0" id="parameter_value${i}_0" from="${params.objectFields}" style="width: 48%"
                                           noSelection="[null : 'Please select a property..']"/>
                             </g:elseif>
                             <g:elseif test="${MethodInfo.isDatumOnWrapperAndTuplePosition((String)params.method, i, 1)}">
                                 <g:select name="parameter_value${i}_0" id="parameter_value${i}_0" from="${params.entries}" style="width: 48%"
-                                          noSelection="[null : 'Please select a datum...']" placeholder="parametervalue" />
+                                          noSelection="[null : 'Please select a datum...']" placeholder="parametervalue"
+                                          onchange="if(this.value == '${TransformationController.arithmeticPlaceholder}'){
+                                          var belongs_to = ${params.belongs_to}; var left_value = \$('#parameter_key1_0').val(); ${remoteFunction(action: 'setArithmeticParameters', update: "parameter_properties1",
+                                          params: '\'right_value=\' + this.value + \'&left_value=\' + left_value + \'&belongs_to=\' + belongs_to')}}"/>
                             </g:elseif>
                             <g:else>
                                 <g:textField name="parameter_value${i}_0" id="parameter_value${i}_0" placeholder="parametervalue" style="width: 48%" />

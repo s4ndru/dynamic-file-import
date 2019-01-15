@@ -7,17 +7,19 @@ import extraction.EntryDataType
  */
 
 enum MethodInfo {
-    APPENDSTRING("appendStrings"),
-    PREPENDSTRING("prependStrings"),
+    APPENDSTRING("appendString"),
+    PREPENDSTRING("prependString"),
     SPLITSTRINGFIELD("splitStringField"),
     CONCATENATEFIELDS("concatenateFields"),
     CALCULATESUM("calculateSum"),
     CALCULATEMEAN("calculateMean"),
+	ARITHMETICOPERATION("arithmeticOperation"),
+	UNARYARITHMETICOPERATION("unaryArithmeticOperation"),
     SETTIMESTAMP("setTimestamp"),
     REGEXREPLACE("regexReplace"),
     SETVALUEFROMOPTIONALVALUES("setValueFromOptionalValues"),
-//    FINDANDCACHERELATION("findAndCacheRelation"),
     CREATERELATION("createRelation"),
+    CREATEONETOMANYRELATION("createOneToManyRelation"),
     CACHEINFOFORCROSSPROCEDURE("cacheInfoForCrossProcedure"),
     CROSSCREATERELATION("crossCreateRelation"),
     CROSSSETVALUE("crossSetValue"),
@@ -29,18 +31,21 @@ enum MethodInfo {
 
     // How many wrappers does each transformation-method have
     static LinkedHashMap<String, Integer> wrapperCountMap =
-            ["appendStrings": 1,
-             "prependStrings": 1,
+            ["appendString": 1,
+             "prependString": 1,
              "trimField": 1,
              "splitStringField": 2,
              "concatenateFields": 2,
              "calculateSum": 2,
              "calculateMean": 2,
+			 "arithmeticOperation": 2,
+			 "unaryArithmeticOperation": 1,
              "regexReplace": 2,
              "setValueFromOptionalValues": 2,
 //             "findAndCacheRelation": 2,
              "setTimestamp": 1,
              "createRelation": 2,
+             "createOneToManyRelation": 2,
              "cacheInfoForCrossProcedure": 3,
              "crossCreateRelation": 2,
              "crossSetValue": 1,
@@ -51,15 +56,19 @@ enum MethodInfo {
     // Wrapper index of the data sets which are set by the parsers for each transformation method
     // E.g.: A "0" in datumWrapperPositionMap tells us that the first wrapper contains the parser created data
     static LinkedHashMap<String, Integer> datumWrapperPositionMap =
-            ["appendStrings": 0,
-             "prependStrings": 0,
+            ["appendString": 0,
+             "prependString": 0,
              "splitStringField": 0,
              "concatenateFields": 1,
              "calculateSum": 1,
              "calculateMean": 1,
+			 "arithmeticOperation": 1,
+			 "unaryArithmeticOperation": 0,
              "regexReplace": 0,
              "setValueFromOptionalValues": 1,
 //             "findAndCacheRelation": 0,
+             "createRelation": 1,
+             "createOneToManyRelation": 1,
              "crossCreateRelation": 1,
              "crossSetValue": 0,
              "identityTransfer": 0,
@@ -69,16 +78,20 @@ enum MethodInfo {
     // To be used in combination with datumWrapperPositionMap
     // E.g.: [0,1] means the "left" and "right side" of the tuple is in use for the parser created data
     static LinkedHashMap<String, List<Integer>> datumTuplePositionMap =
-            ["appendStrings": [0],
-             "prependStrings": [1],
+            ["appendString": [0],
+             "prependString": [1],
              "trimField": [0,1],
              "splitStringField": [0],
              "concatenateFields": [0,1],
              "calculateSum": [0,1],
              "calculateMean": [0,1],
+			 "arithmeticOperation": [0,1],
+			 "unaryArithmeticOperation": [0],
              "regexReplace": [1],
              "setValueFromOptionalValues": [0,1],
 //             "findAndCacheRelation": [0],
+             "createRelation": [1],
+             "createOneToManyRelation": [1],
              "crossCreateRelation": [1],
              "crossSetValue": [1],
              "identityTransfer": [0],
@@ -89,6 +102,7 @@ enum MethodInfo {
     static LinkedHashMap<String, Integer> objectWrapperPositionMap =
             ["setTimestamp": 0,
              "createRelation": 0,
+             "createOneToManyRelation": 0,
              "crossCreateRelation": 0,
              "crossSetValue": 0,
              "identityTransfer": 0,
@@ -98,6 +112,7 @@ enum MethodInfo {
     static LinkedHashMap<String, List<Integer>> objectTuplePositionMap =
             ["setTimestamp": [0],
              "createRelation": [0],
+             "createOneToManyRelation": [0],
              "crossCreateRelation": [0],
              "crossSetValue": [0],
              "identityTransfer": [1],
@@ -109,6 +124,7 @@ enum MethodInfo {
              "concatenateFields": 0,
              "calculateSum": 0,
              "calculateMean": 0,
+             "arithmeticOperation": 0,
              "regexReplace": 0,
              "setValueFromOptionalValues": 0]
 
@@ -118,6 +134,7 @@ enum MethodInfo {
              "concatenateFields": EntryDataType.STRING,
              "calculateSum": EntryDataType.FLOAT,
              "calculateMean": EntryDataType.FLOAT,
+             "arithmeticOperation": EntryDataType.FLOAT,
              "regexReplace": EntryDataType.STRING,
              "setValueFromOptionalValues": EntryDataType.STRING]
 
@@ -129,15 +146,17 @@ enum MethodInfo {
 
     // Which wrappers of methods that allow for repeatable entries
     static LinkedHashMap<String, List<Integer>> repeatableSetsMap =
-             ["appendStrings": [0],
-              "prependStrings": [0],
+             ["appendString": [0],
+              "prependString": [0],
               "splitStringField": [1],
               "concatenateFields": [0,1],
               "calculateSum": [1],
               "calculateMean": [1],
+			  "unaryArithmeticOperation": [0],
               "setValueFromOptionalValues": [1],
 //              "findAndCacheRelation": [1],
               "createRelation": [1],
+              "createOneToManyRelation": [1],
               "cacheInfoForCrossProcedure": [0,1,2],
               "crossCreateRelation": [1],
               "crossSetValue": [0],
@@ -148,7 +167,8 @@ enum MethodInfo {
     static LinkedHashMap<String, Integer> secondClassPropertiesPositionMap =
 //            ["findAndCacheRelation": 0,
              ["createRelation": 0,
-             "crossCreateRelation": 0]
+              "createOneToManyRelation": 0,
+              "crossCreateRelation": 0]
 
     // Which methods can be used in conjunction with "cacheInfoForCrossProcedure"
     static List<String> crossProceduresMap =
@@ -159,6 +179,18 @@ enum MethodInfo {
     static List<String> rightSideUnusedMap =
             ["setTimestamp",
              "setValueFromOptionalValues"]
+
+    static List<String> supportedArithmeticOperators =
+            ["+",
+             "-",
+             "*",
+             "/",
+             "%"]
+
+    static List<String> supportedUnaryArithmeticOperators =
+            ["++",
+             "--",
+             "-"]
 
     MethodInfo(String propertyName) {
         this.propertyName = propertyName
@@ -246,5 +278,13 @@ enum MethodInfo {
 
     static Boolean isRightSideNotUsed(String m){
         return rightSideUnusedMap.contains(m)
+    }
+
+    static List<String> getArithmeticOperators(){
+        return supportedArithmeticOperators
+    }
+
+    static List<String> getUnaryArithmeticOperators(){
+        return supportedUnaryArithmeticOperators
     }
 }

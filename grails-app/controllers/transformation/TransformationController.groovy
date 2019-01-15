@@ -6,6 +6,7 @@ import extraction.DynamicParserEntry
 // TODO Doc note => Its possible to submit a method and then change the method in the drop down. Might be catched at runtime, might be not catched if functions are too similar
 
 class TransformationController {
+    static final String arithmeticPlaceholder = "INPUT OWN VALUE..."
 
     def setRoutineProperties() {
 //        if(params.parser == "null"){
@@ -61,13 +62,10 @@ class TransformationController {
             domainList.each { params.domainList.add(it.name) }
         }
 
-        // We get all parsers, under which this routine exists.
-        // This means a routine with its procedures could be applied for different parsers which deliver the same result.
-        List<DynamicParser> parsers = DynamicParser.withCriteria {
-            routines {
-                idEq(routine.id)
-            }
-        }
+//         We get all parsers, under which this routine exists.
+//         This means a routine with its procedures could be applied for different parsers which deliver the same result.
+        // TODO Doc note => Even though it could be more routines, the UI is designed for that each routine only has one parser
+        List<DynamicParser> parsers = DynamicParser.withCriteria { routines { idEq(routine.id) } }
 
         ArrayList entries = parsers.entries.field.flatten()
         entries.addAll(routine.procedures.created_entries.field.flatten())
@@ -82,7 +80,8 @@ class TransformationController {
 //            else if (MethodInfo.isDatumWrapper((String) params["method"], i))
 //                params.objectFields = params.entries
 
-
+        if(params.method == "arithmeticOperation")
+            params.entries.add(arithmeticPlaceholder)
 
         render(template: "createTransformationProcedureSubElements", params: params)
     }
@@ -111,11 +110,7 @@ class TransformationController {
 
         // We get all parsers, under which this routine exists.
         // This means a routine with its procedures could be applied for different parsers which deliver the same result.
-        List<DynamicParser> parsers = DynamicParser.withCriteria {
-            routines {
-                idEq(routine.id)
-            }
-        }
+        List<DynamicParser> parsers = DynamicParser.withCriteria { routines { idEq(routine.id) } }
 
         ArrayList entries = parsers.entries.field.flatten()
         entries.addAll(routine.procedures.created_entries.field.flatten())
@@ -129,10 +124,38 @@ class TransformationController {
                 params.objectFields = grailsApplication.getArtefacts("Domain").find {
                     it.fullName == routine.target_object
                 }.persistantProperties.name.sort()
-            else if (MethodInfo.isDatumWrapper((String) params["method"], i))
-                params.objectFields = params.entries
 
         render(template: "createTransformationProcedureSecondClassParameters", params: params)
+    }
+
+    def setArithmeticParameters(){
+        TransformationRoutine routine = TransformationRoutine.get(Integer.parseInt((String) params.belongs_to))
+
+        // We get all parsers, under which this routine exists.
+        // This means a routine with its procedures could be applied for different parsers which deliver the same result.
+        List<DynamicParser> parsers = DynamicParser.withCriteria { routines { idEq(routine.id) } }
+
+        ArrayList entries = parsers.entries.field.flatten()
+        entries.addAll(routine.procedures.created_entries.field.flatten())
+        params.entries = entries.sort()
+        params.entries.add(arithmeticPlaceholder)
+
+        params.right_value = params.right_value
+        params.left_value = params.left_value
+
+        params.arbitrary_right_value = params.arbitrary_right_value
+        params.arbitrary_left_value = params.arbitrary_left_value
+
+        if(params.right_value == arithmeticPlaceholder) {
+            params.arbitrary_right_value = "true"
+            params.right_value = ""
+        }
+        if(params.left_value == arithmeticPlaceholder) {
+            params.arbitrary_left_value = "true"
+            params.left_value = ""
+        }
+
+        render(template: "createTransformationProcedureArithmeticParameters", params: params)
     }
 
     def createTransformationRoutine() {
