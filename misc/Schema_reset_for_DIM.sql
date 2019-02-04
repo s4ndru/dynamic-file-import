@@ -1,0 +1,16 @@
+drop table transformation_routine_transformation_procedure;
+drop table transformation_procedure_notable_objects;
+drop table dynamic_parser_transformation_routine;
+drop table transformation_procedure_param_entry_wrapper;
+drop table transformation_procedure_dynamic_parser_entry;
+drop table transformation_procedure;
+drop table transformation_routine_update_properties;
+drop table transformation_routine;
+drop table param_entry_wrapper_param_entry;
+drop table param_entry;
+drop table param_entry_wrapper;
+drop table column_width_parser_lines_to_ignore;
+drop table token_split_parser_lines_to_ignore;
+drop table dynamic_parser_dynamic_parser_entry;
+drop table dynamic_parser;
+drop table dynamic_parser_entry;
