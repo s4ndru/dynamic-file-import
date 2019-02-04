@@ -48,8 +48,8 @@
 
     function appendSimpleTagEntry(index){
         $("#entry" + index).append('<div style="width: 100%" id="STPEntries' + index + '"> ' +
-        '<input name="startTag' + index + '" placeholder="Starttag" value="" id="startTag' + index + '" type="text"> ' +
-        '<input name="endTag' + index + '" placeholder="Endtag" value="" id="endTag' + index + '" type="text">' +
+        '<input name="startTag' + index + '" placeholder="Start tag" value="" id="startTag' + index + '" type="text"> ' +
+        '<input name="endTag' + index + '" placeholder="End tag" value="" id="endTag' + index + '" type="text">' +
         '<input name="arraySplitTag' + index + '" placeholder="Array splitting tag" value="" id="arraySplitTag' + index + '" type="text"> ' +
         '</div>' +
         '<hr>');
@@ -68,7 +68,7 @@
         }
 
         if(($("#domainEndTag").val() !== "" && $("#domainStartTag").val() === "") || ($("#domainEndTag").val() === "" && $("#domainStartTag").val() !== "")){
-            alert("Both, domain starttag and endtag, have to be set or not set!");
+            alert("Both, domain start tag and end tag, have to be set or not set!");
             return false;
         }
 
@@ -100,13 +100,13 @@
             }
 
             if($("#startTag" + i).val() === ""){
-                alert("'startTag' has to be set!");
+                alert("'start tag' has to be set!");
                 return false;
             }
 
             for(var j = i + 1; j <= entryCounter; j++) {
                 if($("#startTag" + j).val().includes($("#startTag" + i).val())) {
-                    alert("Simpler start-tag appeared in entry-list that will match tags which are matched by a later defined and more complex start-tag!");
+                    alert("Simpler start tag appeared in entry-list that will match tags which are matched by a later defined and more complex start tag!");
                     return false;
                 }
             }

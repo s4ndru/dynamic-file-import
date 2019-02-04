@@ -160,7 +160,7 @@ class SimpleTagParser extends DynamicParser{
 						nestingLevelTemp = nestedCounter
                 }
                 else{
-                    matchedLine = line.replaceAll("(.*)" + arrayEntry.arraySplitTag, "\$1").trim()
+                    matchedLine = line.replaceAll("(.*)" + Pattern.quote(arrayEntry.arraySplitTag), "\$1").trim()
                     try {
                         arrayEntry.checkType(matchedLine)
                     }
@@ -359,7 +359,7 @@ class SimpleTagParser extends DynamicParser{
 								if(arrayStringBuilder.toString().isEmpty())
 									arrayStringBuilder.append(it)
 								else
-									arrayStringBuilder.append(", " + it)
+									arrayStringBuilder.append("|" + it)
 
                             }
                             allObjects[i].put(entry_it.field, arrayStringBuilder.toString())

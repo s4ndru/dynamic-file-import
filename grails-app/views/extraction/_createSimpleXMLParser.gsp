@@ -2,10 +2,10 @@
     <div id="divDynamicParser">
         <div>
             <g:render template="/extraction/parser"/>
-            <g:textField name="superTag" placeholder="Supertag" />
-            <g:textField name="excelTag" placeholder="Exceltag (for SpreadsheetML)" />
-            <g:field type="number" name="startBuffer" placeholder="# of ignored top supertags" />
-            <g:field type="number" name="endBuffer" placeholder="# of ignored bottom supertags" />
+            <g:textField name="superTag" placeholder="Super tag" />
+            <g:textField name="excelTag" placeholder="Excel tag (for SpreadsheetML)" />
+            <g:field type="number" name="startBuffer" placeholder="# of ignored top super tags" />
+            <g:field type="number" name="endBuffer" placeholder="# of ignored bottom super tags" />
         </div>
     </div>
 
@@ -43,14 +43,14 @@
         }
 
         if($("#superTag").val() === ""){
-            alert("Please fill out the 'Supertag'-field.");
+            alert("Please fill out the 'Super tag'-field.");
             return false;
         }
 
-        if(($("#excelTag").val() !== "" && ($("#startBuffer").val() === "" || $("#endBuffer").val() === "")) || ($("#excelTag").val() === "" && $("#startBuffer").val() !== "" && $("#endBuffer").val() !== "")){
-            alert("'Exceltag' and the 'ignored top supertags' or 'ignored bottom supertags' fields can not be set without each other. Either set 'Exceltag' + 'ignored top supertags' + ('ignored bottom supertags') or none!");
+        /*if(($("#excelTag").val() !== "" && ($("#startBuffer").val() === "" || $("#endBuffer").val() === "")) || ($("#excelTag").val() === "" && $("#startBuffer").val() !== "" && $("#endBuffer").val() !== "")){
+            alert("'Excel tag' and the 'ignored top super tags' or 'ignored bottom super tags' fields can not be set without each other. Either set 'Excel tag' + 'ignored top super tags' + ('ignored bottom super tags') or none!");
             return false;
-        }
+        }*/
 
         var i;
 

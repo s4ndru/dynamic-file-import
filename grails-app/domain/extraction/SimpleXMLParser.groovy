@@ -15,10 +15,10 @@ class SimpleXMLParser extends DynamicParser{
     Integer endBuffer = 0
 
     static constraints = {
-        superTag nullable: true
-        excelTag nullable: true, validator: { val, obj ->
+        superTag nullable: false, blank: false
+        excelTag nullable: true, blank: false/*, validator: { val, obj ->
             return (val == null && obj.startBuffer == 0 && obj.endBuffer == 0) || (val != null && obj.startBuffer > 0)
-        }
+        }*/
 
         startBuffer min: 0
         endBuffer min: 0

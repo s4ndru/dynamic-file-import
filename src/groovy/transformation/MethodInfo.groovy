@@ -9,15 +9,16 @@ import extraction.EntryDataType
 enum MethodInfo {
     APPENDSTRING("appendString"),
     PREPENDSTRING("prependString"),
+    TRIMFIELD("trimField"),
     SPLITSTRINGFIELD("splitStringField"),
     CONCATENATEFIELDS("concatenateFields"),
     CALCULATESUM("calculateSum"),
     CALCULATEMEAN("calculateMean"),
 	ARITHMETICOPERATION("arithmeticOperation"),
 	UNARYARITHMETICOPERATION("unaryArithmeticOperation"),
-    SETTIMESTAMP("setTimestamp"),
     REGEXREPLACE("regexReplace"),
     SETVALUEFROMOPTIONALVALUES("setValueFromOptionalValues"),
+    SETTIMESTAMP("setTimestamp"),
     CREATERELATION("createRelation"),
     CREATEONETOMANYRELATION("createOneToManyRelation"),
     CACHEINFOFORCROSSPROCEDURE("cacheInfoForCrossProcedure"),
@@ -58,6 +59,7 @@ enum MethodInfo {
     static LinkedHashMap<String, Integer> datumWrapperPositionMap =
             ["appendString": 0,
              "prependString": 0,
+             "trimField": 0,
              "splitStringField": 0,
              "concatenateFields": 1,
              "calculateSum": 1,
@@ -94,8 +96,8 @@ enum MethodInfo {
              "createOneToManyRelation": [1],
              "crossCreateRelation": [1],
              "crossSetValue": [1],
-             "identityTransfer": [0],
-             "identityTransferAndSave": [0]]
+             "identityTransfer": [1],
+             "identityTransferAndSave": [1]]
 
 
     // Which wrappers of transformation methods are working with the routine defined object properties
@@ -115,8 +117,8 @@ enum MethodInfo {
              "createOneToManyRelation": [0],
              "crossCreateRelation": [0],
              "crossSetValue": [0],
-             "identityTransfer": [1],
-             "identityTransferAndSave": [1]]
+             "identityTransfer": [0],
+             "identityTransferAndSave": [0]]
 
     // Position of procedure created data in wrappers
     static LinkedHashMap<String, Integer> createdDatumWrapperPositionMap =
@@ -148,6 +150,7 @@ enum MethodInfo {
     static LinkedHashMap<String, List<Integer>> repeatableSetsMap =
              ["appendString": [0],
               "prependString": [0],
+              "trimField": [0],
               "splitStringField": [1],
               "concatenateFields": [0,1],
               "calculateSum": [1],

@@ -9,7 +9,7 @@
 </div>
 
 <div>
-    <label for="property_container">
+    <label for="property_container" style="width: 100%">
         Properties of object to update:
         <div id="property_container">
             <div id="update_properties">

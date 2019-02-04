@@ -19,7 +19,9 @@ class TransformationController {
 //        }
 
         DynamicParser parser = DynamicParser.get(Integer.parseInt((String) params.parser))
-        params.entries = parser.entries.field.sort()
+		Set entries = new TreeSet(parser.entries.field.flatten())
+		entries.addAll(parser.routines.procedures.created_entries.field.flatten())
+        params.entries = entries.asList().sort()
 
         params.properties = grailsApplication.getArtefacts("Domain").find {
             it.fullName == params.targetObject
@@ -32,15 +34,6 @@ class TransformationController {
     }
 
     def setProcedureProperties() {
-//        if(params.routine == "null"){
-//            render(status: 400, text: "Please select a routine from the 'Routine' dropdown!")
-//            return
-//        }
-//        if(params.method == "null"){
-//            render(status: 400, text: "Please select a method from the 'Methodname' dropdown!")
-//            return
-//        }
-
 
         TransformationRoutine routine = TransformationRoutine.get(Integer.parseInt((String) params.belongs_to))
 
@@ -62,14 +55,8 @@ class TransformationController {
             domainList.each { params.domainList.add(it.name) }
         }
 
-//         We get all parsers, under which this routine exists.
-//         This means a routine with its procedures could be applied for different parsers which deliver the same result.
-        // TODO Doc note => Even though it could be more routines, the UI is designed for that each routine only has one parser
-        List<DynamicParser> parsers = DynamicParser.withCriteria { routines { idEq(routine.id) } }
+        params.entries = getAllEntriesFromRoutine(routine)
 
-        ArrayList entries = parsers.entries.field.flatten()
-        entries.addAll(routine.procedures.created_entries.field.flatten())
-        params.entries = entries.sort()
         params.wrapperCount = MethodInfo.getWrapperCount(MethodInfo.fromString((String) params.method))
 
         for (int i = 0; i < (Integer) params.wrapperCount; i++)
@@ -90,7 +77,9 @@ class TransformationController {
         params.propertyCounter = Integer.parseInt((String) params.propertyCounter) + 1
 
         DynamicParser parser = DynamicParser.get(Integer.parseInt((String) params.belongs_to))
-        params.entries = parser.entries.field
+		Set entries = new TreeSet(parser.entries.field.flatten())
+		entries.addAll(parser.routines.procedures.created_entries.field.flatten())
+		params.entries = entries.asList().sort()
 
         params.properties = grailsApplication.getArtefacts("Domain").find {
             it.fullName == params.target_object
@@ -108,13 +97,7 @@ class TransformationController {
     def setSecondClassProperties(){
         TransformationRoutine routine = TransformationRoutine.get(Integer.parseInt((String) params.belongs_to))
 
-        // We get all parsers, under which this routine exists.
-        // This means a routine with its procedures could be applied for different parsers which deliver the same result.
-        List<DynamicParser> parsers = DynamicParser.withCriteria { routines { idEq(routine.id) } }
-
-        ArrayList entries = parsers.entries.field.flatten()
-        entries.addAll(routine.procedures.created_entries.field.flatten())
-        params.entries = entries.sort()
+        params.entries = getAllEntriesFromRoutine(routine)
         params.method = params.method
         params.index = Integer.parseInt(params.index)
         params.secondPropertiesList = grailsApplication.getArtefacts("Domain").find{it.fullName == params.selectedClass}.persistantProperties.name.sort()
@@ -131,13 +114,7 @@ class TransformationController {
     def setArithmeticParameters(){
         TransformationRoutine routine = TransformationRoutine.get(Integer.parseInt((String) params.belongs_to))
 
-        // We get all parsers, under which this routine exists.
-        // This means a routine with its procedures could be applied for different parsers which deliver the same result.
-        List<DynamicParser> parsers = DynamicParser.withCriteria { routines { idEq(routine.id) } }
-
-        ArrayList entries = parsers.entries.field.flatten()
-        entries.addAll(routine.procedures.created_entries.field.flatten())
-        params.entries = entries.sort()
+        params.entries = getAllEntriesFromRoutine(routine)
         params.entries.add(arithmeticPlaceholder)
 
         params.right_value = params.right_value
@@ -159,93 +136,86 @@ class TransformationController {
     }
 
     def createTransformationRoutine() {
-        try {
-            DynamicParser parser = DynamicParser.get(Integer.parseInt((String) params["belongs_to"]))
+        DynamicParser parser = DynamicParser.get(Integer.parseInt((String) params["belongs_to"]))
 
-            // If the user set no order id/sequence id, then we just iterate from 0 to "max int" until we find a free id
-            if (params["order_id"] == "")
-                if (parser.routines.order_id.size() != 0) {
-                    for (int i = 0; ; i++)
-                        if (!parser.routines.order_id.contains(i)) {
-                            params["order_id"] = i.toString()
-                            break
-                        }
-                }
-                else
-                    params["order_id"] = 0.toString()
-
-            if (parser.routines.order_id.contains(Integer.parseInt((String) params["order_id"]))) {
-                StringBuilder sequenceNumbersString = new StringBuilder()
-                parser.routines.order_id.each {
-                    sequenceNumbersString.append(it)
-                    sequenceNumbersString.append(", ")
-                }
-                sequenceNumbersString.delete(sequenceNumbersString.length() - 2, sequenceNumbersString.length())
-
-                render(status: 400, text: "The sequence numbers '" + sequenceNumbersString.toString() + "' are already taken! Please input a number unequal to the others.")
-                return
+        // If the user set no order id/sequence id, then we just iterate from 0 to "max int" until we find a free id
+        if (params["order_id"] == "")
+            if (parser.routines.order_id.size() != 0) {
+                for (int i = 0; ; i++)
+                    if (!parser.routines.order_id.contains(i)) {
+                        params["order_id"] = i.toString()
+                        break
+                    }
             }
+            else
+                params["order_id"] = 0.toString()
 
-            TransformationRoutine tr = new TransformationRoutine()
-            Class temp_class = TransformationService.getClassFromString((String)params["target_object"])
+        if (parser.routines.order_id.contains(Integer.parseInt((String) params["order_id"]))) {
+            StringBuilder sequenceNumbersString = new StringBuilder()
+            parser.routines.order_id.each {
+                sequenceNumbersString.append(it)
+                sequenceNumbersString.append(", ")
+            }
+            sequenceNumbersString.delete(sequenceNumbersString.length() - 2, sequenceNumbersString.length())
 
-            tr.properties = params
+            render(status: 400, text: "The sequence numbers '" + sequenceNumbersString.toString() + "' are already taken! Please input a number unequal to the others.")
+            return
+        }
 
-            if (params["to_update"]) {
-                for (int i = 0; params["update_key" + i] && params["update_key" + i] != "null" && params["update_value" + i] && params["update_value" + i] != "null"; i++) {
+        TransformationRoutine tr = new TransformationRoutine()
+        Class temp_class = TransformationService.getClassFromString((String)params["target_object"])
 
-                    // Problematic if field has a name which is predefined in grails. e.g. constraints, errors, log
-                    if (temp_class.declaredFields.collect().find { it.name == params["update_value" + i] } == null) {
-                        render(status: 400, text: "The class '" + (String) params["target_object"] + "' does not have a property '" + (String) params["update_value" + i] + "'! Please go back and reconsider the update property parameter(s).")
-                        return
-                    }
+        tr.properties = params
 
-                    if (parser.entries.field.find { it == params["update_key" + i] } == null) {
-                        render(status: 400, text: "The parser '" + parser.name + "' does not have an entry '" + (String) params["update_key" + i] + "'! Please go back and reconsider the update entry parameter(s).")
-                        return
-                    }
+        if (params["to_update"]) {
+            for (int i = 0; params["update_key" + i] && params["update_key" + i] != "null" && params["update_value" + i] && params["update_value" + i] != "null"; i++) {
 
-                    tr.update_properties.put((String) params["update_key" + i], (String) params["update_value" + i])
-
-                    //params["update_key" + i] = (String) params["update_key" + i]
-                    //params["update_value" + i] = (String) params["update_value" + i]
-                }
-                if (tr.update_properties.size() == 0) {
-                    render(status: 400, text: "There are no update properties defined, even though the 'Update existing'-checkbox is checked!")
+                // Problematic if field has a name which is predefined in grails. e.g. constraints, errors, log
+                if (temp_class.declaredFields.collect().find { it.name == params["update_value" + i] } == null) {
+                    render(status: 400, text: "The class '" + (String) params["target_object"] + "' does not have a property '" + (String) params["update_value" + i] + "'! Please go back and reconsider the update property parameter(s).")
                     return
                 }
 
-                //params["propertyCounter"] = i
-            } else {
-                while (params["update_key" + 0] && params["update_key" + 0] != "null" && params["update_value" + 0] && params["update_value" + 0] != "null") {
-                    render(status: 400, text: "Update properties were set even though 'Update existing'-checkbox was not set! Please rethink if you actually want to update existing objects.")
+                if (parser.entries.field.find { it == params["update_key" + i] } == null) {
+                    render(status: 400, text: "The parser '" + parser.name + "' does not have an entry '" + (String) params["update_key" + i] + "'! Please go back and reconsider the update entry parameter(s).")
                     return
                 }
-            }
-            /*else{
-                //params["propertyCounter"] = 0
-            }*/
 
-            tr.save(flush: true)
-            if(tr.hasErrors()){
-                // Took the generated error message and only output the first one without all the codes etc.
-                // The split splits the error message in three parts, where we are interested in the second one because it contains the most relevant information
-                render(status: 400, text: "Saving the routine produced an error: " + tr.errors.toString().split("\n|; codes")[1])
+                tr.update_properties.put((String) params["update_key" + i], (String) params["update_value" + i])
+
+                //params["update_key" + i] = (String) params["update_key" + i]
+                //params["update_value" + i] = (String) params["update_value" + i]
+            }
+            if (tr.update_properties.size() == 0) {
+                render(status: 400, text: "There are no update properties defined, even though the 'Update existing'-checkbox is checked!")
                 return
             }
 
-            parser.routines.add(tr)
-            parser.save(flush: true)
-            if(parser.hasErrors()){
-                // Took the generated error message and only output the first one without all the codes etc.
-                // The split splits the error message in three parts, where we are interested in the second one because it contains the most relevant information
-                render(status: 400, text: "Saving the parser with the newly created routine produced an error: " + parser.errors.toString().split("\n|; codes")[1])
+            //params["propertyCounter"] = i
+        } else {
+            while (params["update_key" + 0] && params["update_key" + 0] != "null" && params["update_value" + 0] && params["update_value" + 0] != "null") {
+                render(status: 400, text: "Update properties were set even though 'Update existing'-checkbox was not set! Please rethink if you actually want to update existing objects.")
                 return
             }
         }
-        catch (IncorrectSpecificationException e) {
-            render(status: 400, text: "Sorry, a target object: '" + (String) params["target_object"] + "' is not valid! Please go back and reconsider the target-object selection.")
-            //redirect(url: request.getHeader('referer'), params: params)
+        /*else{
+            //params["propertyCounter"] = 0
+        }*/
+
+        tr.save(flush: true)
+        if(tr.hasErrors()){
+            // Took the generated error message and only output the first one without all the codes etc.
+            // The split splits the error message in three parts, where we are interested in the second one because it contains the most relevant information
+            render(status: 400, text: "Saving the routine produced an error: " + tr.errors.toString().split("\n|; codes")[1])
+            return
+        }
+
+        parser.routines.add(tr)
+        parser.save(flush: true)
+        if(parser.hasErrors()){
+            // Took the generated error message and only output the first one without all the codes etc.
+            // The split splits the error message in three parts, where we are interested in the second one because it contains the most relevant information
+            render(status: 400, text: "Saving the parser with the newly created routine produced an error: " + parser.errors.toString().split("\n|; codes")[1])
             return
         }
 
@@ -386,4 +356,20 @@ class TransformationController {
         render(status: 200)
     }
 
+    def getAllEntriesFromRoutine(TransformationRoutine routine){
+
+        List<DynamicParser> parsers = DynamicParser.withCriteria { routines { idEq(routine.id) } }
+        Set entries = new TreeSet(parsers.entries.field.flatten())
+        entries.addAll(parsers.routines.flatten().findAll({ it.order_id <= routine.order_id}).procedures.created_entries.field.flatten())
+
+        return entries.asList().sort()
+    }
+
+    /*def getAllEntriesFromBaseParser(DynamicParser parser){
+
+        Set entries = new TreeSet(parser.entries.field.flatten())
+        entries.addAll(parser.routines.procedures.created_entries.field.flatten())
+
+        return entries.asList().sort()
+    }*/
 }

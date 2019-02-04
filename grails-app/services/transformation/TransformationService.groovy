@@ -144,6 +144,13 @@ class TransformationService {
             catch(Exception e){
                 throw new IncorrectSpecificationException("Specified entry cannot be parsed to the data type of the object it is assigned to.")
             }
+        else if(obj instanceof Double)
+            try{
+                return Double.parseDouble(fieldToParse)
+            }
+            catch(Exception e){
+                throw new IncorrectSpecificationException("Specified entry cannot be parsed to the data type of the object it is assigned to.")
+            }
         else if(obj instanceof String)
             try{
                 return fieldToParse.toString()
@@ -195,9 +202,9 @@ class TransformationService {
     static def appendString(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance){
         checkIfParamsSetCorrectly("appendString", procedure)
 
-        def parameters = procedure.parameterWrappers.first().parameters.first()
+        def parameters = procedure.parameterWrappers.first().parameters
         parameters.each{ parameter ->
-            if(parameter.left_value != null && parameter.left_value != "" && parameter.left_value != "null")
+            if(parameter.left_value != null && parameter.left_value != "" && parameter.left_value != "null" && datum[parameter.left_value] != null)
                 datum[parameter.left_value] = datum[parameter.left_value] + parameter.right_value
         }
     }
@@ -206,10 +213,10 @@ class TransformationService {
     static def prependString(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance){
         checkIfParamsSetCorrectly("prependString", procedure)
 
-        def parameters = procedure.parameterWrappers.first().parameters.first()
+        def parameters = procedure.parameterWrappers.first().parameters
         parameters.each{ parameter ->
-            if(parameter.left_value != null && parameter.left_value != "" && parameter.left_value != "null")
-                datum[parameter.left_value] = parameter.left_value + datum[parameter.right_value]
+            if(parameter.right_value != null && parameter.right_value != "" && parameter.right_value != "null" && datum[parameter.right_value] != null)
+                datum[parameter.right_value] = parameter.left_value + datum[parameter.right_value]
         }
     }
 
@@ -217,11 +224,11 @@ class TransformationService {
     static def trimField(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance){
         checkIfParamsSetCorrectly("trimField", procedure)
 
-        def parameters = procedure.parameterWrappers.first().parameters.first()
+        def parameters = procedure.parameterWrappers.first().parameters
         parameters.each{ parameter ->
-            if(parameter.left_value != null && parameter.left_value != "" && parameter.left_value != "null")
+            if(parameter.left_value != null && parameter.left_value != "" && parameter.left_value != "null" && datum[parameter.left_value] != null)
                 datum[parameter.left_value] = datum[parameter.left_value].trim()
-            if(parameter.right_value != null && parameter.right_value != "" && parameter.right_value != "null")
+            if(parameter.right_value != null && parameter.right_value != "" && parameter.right_value != "null" && datum[parameter.right_value] != null)
                 datum[parameter.right_value] = datum[parameter.right_value].trim()
         }
     }
@@ -234,15 +241,12 @@ class TransformationService {
     static def splitStringField(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
         checkIfParamsSetCorrectly("splitStringField", procedure)
 
-        def param = procedure.parameterWrappers.first().parameters.asList().first()
-        def mapping = procedure.parameterWrappers.asList()[1].parameters.asList()
+        def param = procedure.parameterWrappers.first().parameters.first()
+        def mapping = procedure.parameterWrappers.asList()[1].parameters
         def line_to_split = datum[param.left_value]
         def split_lines = line_to_split.split("\\s*"+ param.right_value +"\\s*")
 
         mapping.each{
-            if(datum.get(it.left_value) == null)
-                datum.put(it.left_value, "")
-
             def index = Integer.parseInt(it.right_value)
 
             if(index < split_lines.size())
@@ -255,19 +259,19 @@ class TransformationService {
     static def concatenateFields(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
         checkIfParamsSetCorrectly("concatenateFields", procedure)
 
-        String fieldname = procedure.parameterWrappers.first().parameters.asList().first().left_value
-        String mid_string = procedure.parameterWrappers.first().parameters.asList().first().right_value
-        def fields_to_append = procedure.parameterWrappers.asList()[1].parameters.asList()
+        String fieldname = procedure.parameterWrappers.first().parameters.first().left_value
+        String mid_string = procedure.parameterWrappers.first().parameters.first().right_value
+        def fields_to_append = procedure.parameterWrappers.asList()[1].parameters
 
         StringBuilder result = new StringBuilder("")
         fields_to_append.eachWithIndex { it, index ->
-            if (it.left_value != null && it.left_value != "" && it.left_value != "null") {
+            if (it.left_value != null && it.left_value != "" && it.left_value != "null" && datum[it.left_value] != null) {
                 if (!result.toString().isEmpty())
                     result.append(mid_string)
 
                 result.append(datum[it.left_value])
             }
-            if (it.right_value != null && it.right_value != "" && it.right_value != "null") {
+            if (it.right_value != null && it.right_value != "" && it.right_value != "null" && datum[it.right_value] != null) {
                 if (!result.toString().isEmpty())
                     result.append(mid_string)
 
@@ -275,8 +279,6 @@ class TransformationService {
             }
         }
 
-        if(datum.get(fieldname) == null)
-            datum.put(fieldname, "")
         datum[fieldname] = result.toString()
     }
 
@@ -286,16 +288,16 @@ class TransformationService {
     static def calculateSum(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
         checkIfParamsSetCorrectly("calculateSum", procedure)
 
-        String multiplier = procedure.parameterWrappers.first().parameters.asList().first().right_value
-        String fieldName = procedure.parameterWrappers.first().parameters.asList().first().left_value
-        def fields_to_aggregate = procedure.parameterWrappers.asList()[1].parameters.asList()
+        String multiplier = procedure.parameterWrappers.first().parameters.first().right_value
+        String fieldName = procedure.parameterWrappers.first().parameters.first().left_value
+        def fields_to_aggregate = procedure.parameterWrappers.asList()[1].parameters
         ArrayList<Float> converted_fields = new ArrayList()
         float result = 0
 
         fields_to_aggregate.each{
-            if(it.left_value != "" && it.left_value != null && it.left_value != "null")
+            if(it.left_value != "" && it.left_value != null && it.left_value != "null" && datum[it.left_value] != null)
                 converted_fields.add(Float.parseFloat(datum[it.left_value].toString()))
-            if(it.right_value != "" && it.right_value != null && it.right_value != "null")
+            if(it.right_value != "" && it.right_value != null && it.right_value != "null" && datum[it.right_value] != null)
                 converted_fields.add(Float.parseFloat(datum[it.right_value].toString()))
         }
 
@@ -303,8 +305,6 @@ class TransformationService {
             result += (it * ((multiplier == null || multiplier.equals("") || Float.parseFloat(multiplier) == 0) ? 1.0f : Float.parseFloat(multiplier)))
         }
 
-        if(datum.get(fieldName) == null)
-            datum.put(fieldName, "")
         datum[fieldName] = result
     }
 
@@ -313,16 +313,16 @@ class TransformationService {
     static def calculateMean(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
         checkIfParamsSetCorrectly("calculateMean", procedure)
 
-        String multiplier = procedure.parameterWrappers.first().parameters.asList().first().right_value
-        String fieldName = procedure.parameterWrappers.first().parameters.asList().first().left_value
-        def fields_to_aggregate = procedure.parameterWrappers.asList()[1].parameters.asList()
+        String multiplier = procedure.parameterWrappers.first().parameters.first().right_value
+        String fieldName = procedure.parameterWrappers.first().parameters.first().left_value
+        def fields_to_aggregate = procedure.parameterWrappers.asList()[1].parameters
         ArrayList<Float> converted_fields = new ArrayList()
         float result = 0
 
         fields_to_aggregate.each{
-            if(it.left_value != "" && it.left_value != null && it.left_value != "null")
+            if(it.left_value != "" && it.left_value != null && it.left_value != "null" && datum[it.left_value] != null)
                 converted_fields.add(Float.parseFloat(datum[it.left_value].toString()))
-            if(it.right_value != "" && it.right_value != null && it.right_value != "null")
+            if(it.right_value != "" && it.right_value != null && it.right_value != "null" && datum[it.right_value] != null)
                 converted_fields.add(Float.parseFloat(datum[it.right_value].toString()))
         }
 
@@ -333,8 +333,6 @@ class TransformationService {
         }
         result /= count
 
-        if(datum.get(fieldName) == null)
-            datum.put(fieldName, "")
         datum[fieldName] = result
     }
 
@@ -363,9 +361,6 @@ class TransformationService {
         if((datum[operands.left_value] != null && datum[operands.left_value] instanceof String) || (datum[operands.right_value] != null && datum[operands.right_value] instanceof String))
             throw new ValidationException("Found a 'String' object in the 'unaryOperation' transformation method. Unary arithmetic operations can only applied on numbers.")
 
-        if(datum.get(fieldName) == null)
-            datum.put(fieldName, "")
-
         if(operator == "+")
             datum[fieldName] = left_operand + right_operand
         else if(operator == "-")
@@ -382,17 +377,17 @@ class TransformationService {
     static def unaryArithmeticOperation(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
         checkIfParamsSetCorrectly("unaryArithmeticOperation", procedure)
 
-        def parameters = procedure.parameterWrappers.first().parameters.first()
+        def parameters = procedure.parameterWrappers.first().parameters
 
         parameters.eachWithIndex{ parameter, parameter_index ->
             if(datum[parameter.left_value] instanceof String)
                 throw new ValidationException("Found a 'String' object in the 'unaryOperation' transformation method. Unary arithmetic operations can only applied on numbers.")
 
-            if(parameter.right_value == "++")
-                datum[parameter.left_value] = datum[parameter.left_value]++
-            else if(parameter.right_value == "--")
-                datum[parameter.left_value] = datum[parameter.left_value]--
-            else if(parameter.right_value == "-")
+            if(parameter.right_value == "++" && datum[parameter.left_value] != null)
+                datum[parameter.left_value]++
+            else if(parameter.right_value == "--" && datum[parameter.left_value] != null)
+                datum[parameter.left_value]--
+            else if(parameter.right_value == "-" && datum[parameter.left_value] != null)
                 datum[parameter.left_value] = -datum[parameter.left_value]
         }
     }
@@ -403,15 +398,13 @@ class TransformationService {
     static def regexReplace(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
         checkIfParamsSetCorrectly("regexReplace", procedure)
 
-        String fieldName = procedure.parameterWrappers.first().parameters.asList().first().left_value
-        String fieldToFetch = procedure.parameterWrappers.first().parameters.asList().first().right_value
-        String regexPattern = procedure.parameterWrappers.asList()[1].parameters.asList().first().left_value
-        String replacement = procedure.parameterWrappers.asList()[1].parameters.asList().first().right_value
+        String fieldName = procedure.parameterWrappers.first().parameters.first().left_value
+        String fieldToFetch = procedure.parameterWrappers.first().parameters.first().right_value
+        String regexPattern = procedure.parameterWrappers.asList()[1].parameters.first().left_value
+        String replacement = procedure.parameterWrappers.asList()[1].parameters.first().right_value
 
-        if(datum.get(fieldName) == null)
-            datum.put(fieldName, "")
-
-        datum[fieldName] = datum[fieldToFetch].replaceAll(regexPattern, Matcher.quoteReplacement(replacement))
+        if(datum[fieldToFetch] != null)
+            datum[fieldName] = datum[fieldToFetch].replaceAll(regexPattern, replacement)
     }
 
     // Params:  1. Set: [fieldname in datum (where the first non-empty field is saved) : Empty]
@@ -419,11 +412,8 @@ class TransformationService {
     static def setValueFromOptionalValues(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
         checkIfParamsSetCorrectly("setValueFromOptionalValues", procedure)
 
-        def fieldName = procedure.parameterWrappers.first().parameters.asList().first().left_value
-        def fields = procedure.parameterWrappers.asList()[1].parameters.asList()
-
-        if(datum.get(fieldName) == null)
-            datum.put(fieldName, "")
+        def fieldName = procedure.parameterWrappers.first().parameters.first().left_value
+        def fields = procedure.parameterWrappers.asList()[1].parameters
 
         // TODO Doc note => Converts to string, which is then later converted to the corresponding type of the property => see identityTransfer
         fields.each{
@@ -445,7 +435,7 @@ class TransformationService {
     static def setTimestamp(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
         checkIfParamsSetCorrectly("setTimestamp", procedure)
 
-        def params = procedure.parameterWrappers.first().parameters.asList().first()
+        def params = procedure.parameterWrappers.first().parameters.first()
 
 		if(object_instance.metaClass.getProperties().find{ class_it -> class_it.name == params.left_value} == null)
 			throw new IncorrectSpecificationException("Can not find class with name '" + params.left_value + "'!")
@@ -460,8 +450,8 @@ class TransformationService {
     static def createRelation(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
         checkIfParamsSetCorrectly("createRelation", procedure)
 
-        def params = procedure.parameterWrappers.first().parameters.asList().first()
-        def mapping = procedure.parameterWrappers.asList()[1].parameters.asList()
+        def params = procedure.parameterWrappers.first().parameters.first()
+        def mapping = procedure.parameterWrappers.asList()[1].parameters
 
         Class target_class = getClassFromString(params.right_value)
         StringBuilder propertiesErrorString = new StringBuilder()
@@ -493,8 +483,8 @@ class TransformationService {
     static def createOneToManyRelation(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
         checkIfParamsSetCorrectly("createOneToManyRelation", procedure)
 
-        def params = procedure.parameterWrappers.first().parameters.asList().first()
-        def mapping = procedure.parameterWrappers.asList()[1].parameters.asList()
+        def params = procedure.parameterWrappers.first().parameters.first()
+        def mapping = procedure.parameterWrappers.asList()[1].parameters
 
         Class target_class = getClassFromString(params.right_value)
         StringBuilder propertiesErrorString = new StringBuilder()
@@ -586,10 +576,10 @@ class TransformationService {
     static def crossCreateRelation(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
         checkIfParamsSetCorrectly("crossCreateRelation", procedure)
 
-        def params = procedure.parameterWrappers.first().parameters.asList()
-        def search_params = procedure.parameterWrappers.asList()[1].parameters.asList()
+        def params = procedure.parameterWrappers.first().parameters.first()
+        def search_params = procedure.parameterWrappers.asList()[1].parameters
 
-        Class target_class = getClassFromString(params[0].right_value)
+        Class target_class = getClassFromString(params.right_value)
 
         // Is used for the method "parseToCorrespondingType"
         Object instance = target_class.newInstance()    //eg TestResponsibility
@@ -631,14 +621,14 @@ class TransformationService {
         if(object_instance.metaClass.getProperties().find{ class_it -> class_it.name == params.left_value} == null)
             throw new IncorrectSpecificationException("Can not find class with name '" + params.left_value + "'!")
 
-        object_instance[params[0].left_value] = found_objects[0]
+        object_instance[params.left_value] = found_objects[0]
     }
 
     // Params:  1. Set: [propertyname in routine set target class : value for property] => repeat X times
     static def crossSetValue(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
         checkIfParamsSetCorrectly("crossSetValue", procedure)
 
-        def value_map = procedure.parameterWrappers.first().parameters.asList()
+        def value_map = procedure.parameterWrappers.first().parameters
 
         value_map.each{
 			if(it.right_value != null && it.right_value != "" && it.right_value != "null"){
@@ -657,13 +647,14 @@ class TransformationService {
     static def identityTransfer(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
         checkIfParamsSetCorrectly("identityTransfer", procedure)
 
-        def IO_map = procedure.parameterWrappers.first().parameters.asList()
+        def IO_map = procedure.parameterWrappers.first().parameters
 
         IO_map.each{ mapping ->
             if(object_instance.metaClass.getProperties().find{ class_it -> class_it.name == mapping.left_value} == null)
                 throw new IncorrectSpecificationException("Can not find class with name '" + mapping.left_value + "'!")
 
-            object_instance[mapping.left_value] = parseToCorrespondingType(object_instance[mapping.left_value], datum[mapping.right_value].toString())
+            if(datum[mapping.right_value] != null)
+                object_instance[mapping.left_value] = parseToCorrespondingType(object_instance[mapping.left_value], datum[mapping.right_value].toString())
         }
     }
 
@@ -671,13 +662,14 @@ class TransformationService {
     static def identityTransferAndSave(TransformationProcedure procedure, Map<String, Object> datum, Object object_instance) {
         checkIfParamsSetCorrectly("identityTransferAndSave", procedure)
 
-        def IO_map = procedure.parameterWrappers.first().parameters.asList()
+        def IO_map = procedure.parameterWrappers.first().parameters
 
         IO_map.each{ mapping ->
             if(object_instance.metaClass.getProperties().find{ class_it -> class_it.name == mapping.left_value} == null)
                 throw new IncorrectSpecificationException("Can not find class with name '" + mapping.left_value + "'!")
 
-            object_instance[mapping.left_value] = parseToCorrespondingType(object_instance[mapping.left_value], datum[mapping.right_value].toString())
+            if(datum[mapping.right_value] != null)
+                object_instance[mapping.left_value] = parseToCorrespondingType(object_instance[mapping.left_value], datum[mapping.right_value].toString())
         }
 
         object_instance.save(flush: true)

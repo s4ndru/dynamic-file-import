@@ -27,7 +27,7 @@ abstract class DynamicParser {
 			boolean isNoFileCollision = true
 
 			((List<DynamicParser>)getAll()).each{
-				if((it.selectorName.contains(selectorName) || selectorName.contains(it.selectorName))
+				if(obj.id != it.id && (it.selectorName.contains(selectorName) || selectorName.contains(it.selectorName))
 						&& obj.selectorFileType.toString() == it.selectorFileType.toString())
 					isNoFileCollision = false
 			}

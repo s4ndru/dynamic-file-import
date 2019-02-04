@@ -2,9 +2,10 @@ package extraction
 
 class CreateTokenSplitParserTagLib {
 
-    static namespace="dfi"
+    static namespace="dim"
 
     def createTokenSplitParser = {
+        out << g.javascript(library: "jquery", plugin: "jquery")
         out << g.render(template: "/extraction/createTokenSplitParser")
     }
 }

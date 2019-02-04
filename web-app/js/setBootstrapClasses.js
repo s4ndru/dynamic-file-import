@@ -82,7 +82,7 @@ function setBootstrapClasses() {
     $("#update_properties").attr("class", "form-group");
     $("#update_properties > div > select").attr("class", "form-control col-lg-6");
     $("#update_properties > div > select").attr("style", "width: 50%;");
-    $("#update_properties > div > select").first().attr("style", "width: 50%; float: left;");
+    $("#update_properties > div > select:nth-child(2n - 1)").attr("style", "width: 50%; float: left;");
     $("#property_container > input").attr("class", "btn btn-warning");
     $("#routineContainer > input").attr("class", "btn btn-primary pull-right");
 

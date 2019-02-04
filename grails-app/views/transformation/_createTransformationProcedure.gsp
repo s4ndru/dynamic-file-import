@@ -51,14 +51,14 @@
             return false;
         }
 
-        if($("#to_update").is(":checked") == true){
+        /*if($("#to_update").is(":checked") == true){
             for(var i = 0; i <= updatePropertyCounter; i++){
                 if($("#update_key" + i).val() === "" || $("#update_value" + i).val() === ''){
                     alert("When having the update checkbox checked, all 'propertykey' and 'propertyvalue' fields have to be specified.");
                     return false;
                 }
             }
-        }
+        }*/
 
         if($("#transformation_method").val() === "cacheInfoForCrossProcedure" && $("#cross_method").val() === "null"){
             alert("Please select a cross method which will be used in the method 'cacheInforForCrossProcedure'.");

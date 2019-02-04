@@ -16,7 +16,7 @@ A ETL plugin that allows the user to parse files of simple formats, apply transf
 '''
 
     // URL to the plugin's documentation
-    def documentation = "http://grails.org/plugin/dynamic-file-import"
+    def documentation = "http://grails.org/plugin/dynamic-import-module"
 
     // Extra (optional) plugin metadata
 

@@ -170,10 +170,10 @@ class ExtractionController {
         xmlParser.properties = params
         xmlParser.selectorFileType = selectorFileType
 
-        if((params.excelTag == "" && (params.startBuffer != "" || params.endBuffer != "")) || (params.excelTag != "" && params.startBuffer == "" && params.endBuffer != "")){
+       /* if((params.excelTag == "" && (params.startBuffer != "" || params.endBuffer != "")) || (params.excelTag != "" && params.startBuffer == "" && params.endBuffer != "")){
             render(status: 400, text: "'Exceltag' and the 'ignored top supertags' or 'ignored bottom supertags' fields can not be set without each other. Either set 'Exceltag' + 'ignored top supertags' + ('ignored bottom supertags') or none!")
             return
-        }
+        }*/
 
         if(params.excelTag == "")
             xmlParser.excelTag = null

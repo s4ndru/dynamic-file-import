@@ -1,7 +1,7 @@
 package transformation
 
 class CreateTransformationRoutineTagLib {
-    static namespace="dfi"
+    static namespace="dim"
 
     def CreateTransformationRoutine = {
 
@@ -12,6 +12,7 @@ class CreateTransformationRoutineTagLib {
         params.domainList = []
         domainList.each{params.domainList.add(it.name)}
 
+        out << g.javascript(library: "jquery", plugin: "jquery")
         out << g.render(template: "/transformation/createTransformationRoutine", params: params)
     }
 }

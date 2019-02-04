@@ -18,7 +18,7 @@ class ParamEntry implements Comparable{
 
     static constraints = {
 //        special_value nullable: true
-        right_value nullable: true, blank: true, validator: { val, obj -> return !(val == null/* && obj.special_value == null */)}
+        right_value nullable: true, blank: true, validator: { val, obj -> return !(val == null && obj.left_value == null )}
     }
 
     int compareTo(obj){

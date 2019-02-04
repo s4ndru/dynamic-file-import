@@ -11,3 +11,4 @@ class XML_CD_Catalog_Test {
     static constraints = {
     }
 }
+

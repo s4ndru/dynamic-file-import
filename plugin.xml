@@ -1,11 +1,11 @@
-<plugin name='dynamic-file-import' version='0.5' grailsVersion='2.2 &gt; *'>
+<plugin name='dynamic-import-module' version='0.5' grailsVersion='2.2 &gt; *'>
   <author>David Sandru</author>
   <authorEmail>sandru@student.tugraz.at</authorEmail>
-  <title>Dynamic File Import Plugin</title>
+  <title>Dynamic Import Module Plugin</title>
   <description>Brief summary/description of the plugin.
 </description>
-  <documentation>http://grails.org/plugin/dynamic-file-import</documentation>
-  <type>DynamicFileImportGrailsPlugin</type>
+  <documentation>http://grails.org/plugin/dynamic-import-module</documentation>
+  <type>DynamicImportModuleGrailsPlugin</type>
   <resources>
     <resource>extraction.ExtractionController</resource>
     <resource>extraction.ColumnWidthEntry</resource>
