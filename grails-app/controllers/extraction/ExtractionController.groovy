@@ -59,7 +59,7 @@ class ExtractionController {
             it.save(flush: true)
             if(it.hasErrors()){
                 it.errors.each { error->
-                    errorMessage.append(error.toString() + "\n\r")
+                    errorMessage.append(error.toString() + "\r\n")
                 }
             }
         }
@@ -74,7 +74,7 @@ class ExtractionController {
 
         if(tsp.hasErrors()){
             tsp.errors.each{
-                errorMessage.append(it.toString() + "\n\r")
+                errorMessage.append(it.toString() + "\r\n")
             }
 
             render(status: 400, text: errorMessage.toString())
@@ -99,7 +99,6 @@ class ExtractionController {
         cwp.properties = params
         cwp.selectorFileType = selectorFileType
 
-        // TODO Doc note => Stops if user has an empty entry in between. Careful!
         HashSet<String> linesToIgnore = new HashSet<String>()
         int i = 0
         while(params["lineToIgnore" + i])
@@ -130,7 +129,7 @@ class ExtractionController {
             it.save(flush: true)
             if(it.hasErrors()){
                 it.errors.each { error->
-                    errorMessage.append(error.toString() + "\n\r")
+                    errorMessage.append(error.toString() + "\r\n")
                 }
             }
         }
@@ -145,7 +144,7 @@ class ExtractionController {
 
         if(cwp.hasErrors()){
             cwp.errors.each{
-                errorMessage.append(it.toString() + "\n\r")
+                errorMessage.append(it.toString() + "\r\n")
             }
 
             render(status: 400, text: errorMessage.toString())
@@ -203,7 +202,7 @@ class ExtractionController {
             it.save(flush: true)
             if(it.hasErrors()){
                 it.errors.each { error->
-                    errorMessage.append(error.toString() + "\n\r")
+                    errorMessage.append(error.toString() + "\r\n")
                 }
             }
         }
@@ -218,7 +217,7 @@ class ExtractionController {
 
         if(xmlParser.hasErrors()){
             xmlParser.errors.each{
-                errorMessage.append(it.toString() + "\n\r")
+                errorMessage.append(it.toString() + "\r\n")
             }
 
             render(status: 400, text: errorMessage.toString())
@@ -270,7 +269,7 @@ class ExtractionController {
             it.save(flush: true)
             if(it.hasErrors()){
                 it.errors.each { error->
-                    errorMessage.append(error.toString() + "\n\r")
+                    errorMessage.append(error.toString() + "\r\n")
                 }
             }
         }
@@ -285,7 +284,7 @@ class ExtractionController {
 
         if(stp.hasErrors()){
             stp.errors.each{
-                errorMessage.append(it.toString() + "\n\r")
+                errorMessage.append(it.toString() + "\r\n")
             }
 
             render(status: 400, text: errorMessage.toString())

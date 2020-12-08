@@ -42,7 +42,7 @@ class TokenSplitParser extends DynamicParser{
 
 
                 // TODO Doc note => Was thinking if it was safer to limit the max number of splitted entries to the max defined index
-                // In the end I decided against it because that would make no sense if indizes of entries in between are not defined anyway. Consistency issue.
+                // In the end I decided against it because that would make no sense if indices of entries in between are not defined anyway. Consistency issue.
 //                if(entries.splitIndizes.flatten().max() + 1 < splitLine.size())
 //                    throw new ParserUnfitException("Splitted line of file '" + file.name + "' has more entries than the maximum defined index! Please define all possible entries even if they will not be used later.")
 
