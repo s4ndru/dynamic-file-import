@@ -30,7 +30,7 @@ grails.plugin.location."dynamic-import-module" = "dynamic-import-module-master"
 </html>
 ```
 Result:
-[XML parser configuration](https://i.imgur.com/n58E4e1.png)
+![XML parser configuration](https://i.imgur.com/n58E4e1.png "XML parser configuration")
 
 
 Detailed documentation with use cases can be found [here](https://github.com/s4ndru/dynamic-import-module/blob/master/misc/Dynamic_Import_Module.pdf)
