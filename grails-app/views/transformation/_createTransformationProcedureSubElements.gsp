@@ -117,9 +117,8 @@
 
 <div style="clear: both;"></div>
 
-<g:javascript>
+<script>
 
-debugger;
     if("${params.isCrossMethod}" === "true")
         $("#is_repetitive").prop('disabled', true);
 
@@ -177,4 +176,4 @@ debugger;
 
         $("#parameter_properties" + wrapperIndex).append(new_element);
     }
-</g:javascript>
+</script>

@@ -20,7 +20,7 @@
     </div>
 </g:form>
 
-<g:javascript>
+<script>
 
     var updatePropertyCounter = 0;
 
@@ -47,6 +47,6 @@
         return true;
     }
 
-</g:javascript>
+</script>
 
 

@@ -21,7 +21,7 @@
     <div style="clear: both;"></div>
 </g:form>
 
-<g:javascript>
+<script>
     appendColumnWidthEntry(0);
 
     // Nevermind optional will be used actually. Basically it's possible for number fields to be empty number and the program will try to parse them. With optional enabled no error is thrown.
@@ -144,4 +144,4 @@
 
         return true;
     }
-</g:javascript>
+</script>

@@ -18,7 +18,7 @@
     <div style="clear: both;"></div>
 </g:form>
 
-<g:javascript>
+<script>
     appendSimpleTagEntry(0);
 
     $('#formDynamicParser').on('mousedown', '#submitSimpleTagParser', verifyForm);
@@ -114,4 +114,4 @@
 
         return true;
     }
-</g:javascript>
+</script>

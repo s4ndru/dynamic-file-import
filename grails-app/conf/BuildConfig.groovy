@@ -47,7 +47,7 @@ grails.project.dependency.resolution = {
             export = false
         }
 
-//        runtime "org.grails.plugins:jquery:1.11.1"
+        compile "org.grails.plugins:jquery:1.11.1"
         //runtime ':twitter-bootstrap:3.3.4'
     }
 }

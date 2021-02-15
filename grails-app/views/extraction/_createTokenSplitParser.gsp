@@ -27,7 +27,7 @@
     <div style="clear: both;"></div>
 </g:form>
 
-<g:javascript>
+<script>
     appendSplitTokenEntry(0);
 
     $('#formDynamicParser').on('mousedown', '#submitTokenSplitParser', verifyForm);
@@ -130,4 +130,4 @@
 
         return true;
     }
-</g:javascript>
+</script>

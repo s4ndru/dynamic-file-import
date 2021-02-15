@@ -19,7 +19,7 @@
     <div style="clear: both;"></div>
 </g:form>
 
-<g:javascript>
+<script>
 
     // Remove the "optional" checkboxes. Those will not be used for the xmlParser, because of the nature of XML.
     $("#optional0").parent().parent().remove();
@@ -72,4 +72,4 @@
 
         return true;
     }
-</g:javascript>
+</script>

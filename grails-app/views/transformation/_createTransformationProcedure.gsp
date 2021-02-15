@@ -26,7 +26,7 @@
 
 </g:form>
 
-<g:javascript>
+<script>
     $("#divCrossMethod").toggle(false);
 
     $("#transformation_method").change(function(){
@@ -67,4 +67,4 @@
 
         return true;
     }
-</g:javascript>
+</script>

@@ -9,7 +9,7 @@
 </div>
 <button type="button" id="addEntryBtn" >add another entry</button>
 
-<g:javascript>
+<script>
     var entryCounter = 0;
 
     $('#entryContainer').on('click', '#addEntryBtn', function(){
@@ -50,4 +50,4 @@
         $('#entries').append(clonedElement);
 
     });
-</g:javascript>
+</script>
