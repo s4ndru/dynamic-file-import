@@ -4,8 +4,8 @@ Simple ETL module for Grails 2.2.*
 ## How to use
   - Download Source
   - Extract in folder of Grails application
-  - add inline plugin command in BuildConfig.groovy
-  - optionally, if plugin is not detected, do a grails clean
+  - Add inline plugin command in BuildConfig.groovy
+  - Optionally, if inline plugin is not detected, do a grails clean
 
 ```groovy
 // Example of inline plugin command
