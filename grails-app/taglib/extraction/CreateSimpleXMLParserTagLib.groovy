@@ -6,7 +6,7 @@ class CreateSimpleXMLParserTagLib {
 
     def createSimpleXMLParser = {
         out << g.javascript(library: "jquery", plugin: "jquery")
-        out << g.render(template: "/extraction/createSimpleXMLParser")
+        out << g.render(template: "/extraction/createSimpleXMLParser", plugin: "dynamic-import-module")
     }
 }
 

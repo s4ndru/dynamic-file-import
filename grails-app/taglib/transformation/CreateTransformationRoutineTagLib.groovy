@@ -13,6 +13,6 @@ class CreateTransformationRoutineTagLib {
         domainList.each{params.domainList.add(it.name)}
 
         out << g.javascript(library: "jquery", plugin: "jquery")
-        out << g.render(template: "/transformation/createTransformationRoutine", params: params)
+        out << g.render(template: "/transformation/createTransformationRoutine", plugin: "dynamic-import-module", params: params)
     }
 }

@@ -6,6 +6,6 @@ class CreateColumnWidthParserTagLib {
 
     def createColumnWidthParser = {
         out << g.javascript(library: "jquery", plugin: "jquery")
-        out << g.render(template: "/extraction/createColumnWidthParser")
+        out << g.render(template: "/extraction/createColumnWidthParser", plugin: "dynamic-import-module")
     }
 }

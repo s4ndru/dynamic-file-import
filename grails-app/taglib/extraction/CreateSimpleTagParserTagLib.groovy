@@ -6,6 +6,6 @@ class CreateSimpleTagParserTagLib {
 
     def createSimpleTagParser = {
         out << g.javascript(library: "jquery", plugin: "jquery")
-        out << g.render(template: "/extraction/createSimpleTagParser")
+        out << g.render(template: "/extraction/createSimpleTagParser", plugin: "dynamic-import-module")
     }
 }

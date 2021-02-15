@@ -1,28 +1,33 @@
-<plugin name='dynamic-import-module' version='0.5' grailsVersion='2.2 &gt; *'>
+<plugin name='dynamic-import-module' version='1' grailsVersion='2.2 &gt; *'>
   <author>David Sandru</author>
   <authorEmail>sandru@student.tugraz.at</authorEmail>
-  <title>Dynamic Import Module Plugin</title>
-  <description>Brief summary/description of the plugin.
+  <title>Dynamic import module plugin</title>
+  <description>A ETL plugin that allows the user to parse files of simple formats, apply transformation methods on the parsed data and load data into a database.
 </description>
   <documentation>http://grails.org/plugin/dynamic-import-module</documentation>
   <type>DynamicImportModuleGrailsPlugin</type>
   <resources>
     <resource>extraction.ExtractionController</resource>
+    <resource>testing.TestingController</resource>
+    <resource>transformation.TransformationController</resource>
     <resource>extraction.ColumnWidthEntry</resource>
     <resource>extraction.ColumnWidthParser</resource>
     <resource>extraction.DynamicParser</resource>
     <resource>extraction.DynamicParserEntry</resource>
     <resource>extraction.SimpleTagEntry</resource>
     <resource>extraction.SimpleTagParser</resource>
+    <resource>extraction.SimpleXMLEntry</resource>
+    <resource>extraction.SimpleXMLParser</resource>
     <resource>extraction.TokenSplitEntry</resource>
     <resource>extraction.TokenSplitParser</resource>
-    <resource>testing.ColumnWidthTest</resource>
-    <resource>testing.TagSelectTest</resource>
-    <resource>testing.TestAddress</resource>
-    <resource>testing.TestContact</resource>
-    <resource>testing.TestFacility</resource>
-    <resource>testing.TestResponsibility</resource>
+    <resource>testing.RelationTestClass</resource>
+    <resource>testing.SimpleTagTest</resource>
+    <resource>testing.SimpleTagTestBoolean</resource>
+    <resource>testing.SimpleTagTestSingleLine</resource>
     <resource>testing.TokenSplitTest</resource>
+    <resource>testing.XMLTest</resource>
+    <resource>testing.XMLTest_2</resource>
+    <resource>testing.XML_CD_Catalog_Test</resource>
     <resource>transformation.ParamEntry</resource>
     <resource>transformation.ParamEntryWrapper</resource>
     <resource>transformation.TransformationProcedure</resource>
@@ -30,25 +35,27 @@
     <resource>extraction.FileParsingService</resource>
     <resource>transformation.TransformationService</resource>
     <resource>extraction.CreateColumnWidthParserTagLib</resource>
+    <resource>extraction.CreateSimpleTagParserTagLib</resource>
+    <resource>extraction.CreateSimpleXMLParserTagLib</resource>
     <resource>extraction.CreateTokenSplitParserTagLib</resource>
     <resource>extraction.FilesSelectionTagLib</resource>
+    <resource>transformation.CreateTransformationProcedureTagLib</resource>
+    <resource>transformation.CreateTransformationRoutineTagLib</resource>
   </resources>
   <repositories>
-    <repository name='grailsCentral' url='http://grails.org/plugins' />
-    <repository name='mavenCentral' url='http://repo1.maven.org/maven2/' />
-    <repository name='https://oosnmp.net/dist/release/' url='https://oosnmp.net/dist/release/' />
-    <repository name='https://repo.grails.org/grails/plugins' url='https://repo.grails.org/grails/plugins/' />
-    <repository name='http://repository.springsource.com/maven/bundles/external' url='http://repository.springsource.com/maven/bundles/external/' />
+    <repository name='https://repo1.maven.org/maven2/' url='https://repo1.maven.org/maven2/' />
+    <repository name='http://repo.grails.org/grails/plugins' url='http://repo.grails.org/grails/plugins/' />
+    <repository name='https://repository.springsource.com/maven/bundles/external' url='https://repository.springsource.com/maven/bundles/external/' />
   </repositories>
   <dependencies>
     <runtime>
-      <dependency group='org.grails.plugins' name='jquery' version='1.11.1' />
       <dependency group='mysql' name='mysql-connector-java' version='5.1.21' />
     </runtime>
   </dependencies>
   <plugins>
     <runtime>
       <plugin group='org.grails.plugins' name='hibernate' version='2.2.4' />
+      <plugin group='org.grails.plugins' name='jquery' version='1.11.1' />
     </runtime>
     <build>
       <plugin group='org.grails.plugins' name='tomcat' version='2.2.4' />

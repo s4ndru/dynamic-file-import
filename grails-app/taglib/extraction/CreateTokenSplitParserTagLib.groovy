@@ -6,6 +6,6 @@ class CreateTokenSplitParserTagLib {
 
     def createTokenSplitParser = {
         out << g.javascript(library: "jquery", plugin: "jquery")
-        out << g.render(template: "/extraction/createTokenSplitParser")
+        out << g.render(template: "/extraction/createTokenSplitParser", plugin: "dynamic-import-module")
     }
 }

@@ -5,6 +5,6 @@ class CreateTransformationProcedureTagLib {
 
     def CreateTransformationProcedure = {
         out << g.javascript(library: "jquery", plugin: "jquery")
-        out << g.render(template: "/transformation/createTransformationProcedure", params: params)
+        out << g.render(template: "/transformation/createTransformationProcedure", plugin: "dynamic-import-module", params: params)
     }
 }
