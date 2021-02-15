@@ -25,8 +25,8 @@ grails.plugin.location."dynamic-import-module" = "dynamic-import-module-master"
 		<div class="col-lg-4 center-block">
 			<dim:createSimpleXMLParser/>
 		</div>
-		<g:javascript src="setBootstrapClasses.js" plugin="dynamic-import-module"/>
 	</body>
+	<g:javascript src="setBootstrapClasses.js" plugin="dynamic-import-module"/>
 </html>
 ```
 
