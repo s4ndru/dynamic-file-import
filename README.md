@@ -1,7 +1,7 @@
 # Dynamic Import Module
 Simple ETL module for Grails 2.2.*
 
-# How to use
+## How to use
   - Download Source
   - Extract in folder of Grails application
   - add inline plugin command in BuildConfig.groovy
